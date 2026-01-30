@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 config.py - Configuración central de la API Tigo
-MODIFICADO: 
+MODIFICADO v2.2: 
 - Bearer token compartido obligatorio
 - Configuración de roles (admin, revendedor, usuario)
 - Categorías de paquetes mejoradas
@@ -13,11 +13,8 @@ import os
 from datetime import datetime
 
 # ============================================================
-#  BEARER TOKEN COMPARTIDO (NUEVO)
+#  BEARER TOKEN COMPARTIDO (OBLIGATORIO)
 # ============================================================
-# Este token es OBLIGATORIO en todas las solicitudes a la API
-# Debe coincidir con el configurado en webapp/config.py
-# IMPORTANTE: Cambiar en producción
 SHARED_BEARER_TOKEN = "TigoRecargas2026SecureToken_XyZ789"
 
 # ============================================================
@@ -100,8 +97,6 @@ HISTORY_FILE = os.path.join(DATA_DIR, "historial_recargas.json")
 FINGERPRINTS_FILE = os.path.join(DATA_DIR, "fingerprints.json")
 TOKENS_FILE = os.path.join(DATA_DIR, "tokens.json")
 FAILED_ORDERS_FILE = os.path.join(DATA_DIR, "failed_orders.json")
-
-# NUEVOS archivos para roles y revendedores
 RESELLERS_FILE = os.path.join(DATA_DIR, "resellers.json")
 KEY_MODIFICATIONS_FILE = os.path.join(DATA_DIR, "key_modifications.json")
 
@@ -140,7 +135,7 @@ MAX_PACK_PRICE = 500000
 # ============================================================
 ADMIN_API_KEY = "ZoluGames"
 ADMIN_PASSWORD = "Gamehag2025*"
-ADMIN_TELEGRAM_ID = 6317586539  # Telegram ID del admin principal
+ADMIN_TELEGRAM_ID = 6317586539
 
 # ============================================================
 #  RETRY Y REINTENTOS
@@ -148,7 +143,7 @@ ADMIN_TELEGRAM_ID = 6317586539  # Telegram ID del admin principal
 RETRY_DELAY_MINUTES = 10
 
 # ============================================================
-#  CATEGORÍAS DE PAQUETES MEJORADAS (NUEVO)
+#  CATEGORÍAS DE PAQUETES MEJORADAS
 # ============================================================
 PACKAGE_CATEGORIES = {
     "INTERNET_Y_LLAMADAS": {
@@ -182,53 +177,53 @@ PACKAGE_CATEGORIES = {
 }
 
 # ============================================================
-#  NOTAS ADMINISTRATIVAS PREDEFINIDAS (NUEVO)
+#  NOTAS ADMINISTRATIVAS PREDEFINIDAS
 # ============================================================
 ADMIN_NOTES_PRESETS = {
     "AJUSTE_ADMIN": {
         "text": "Ajuste administrativo",
-        "color": "#FF9800",  # Naranja
+        "color": "#FF9800",
         "icon": "⚙️"
     },
     "CARGA_SALDO": {
         "text": "Carga de Saldo",
-        "color": "#4CAF50",  # Verde
+        "color": "#4CAF50",
         "icon": "💰"
     },
     "CORRECCION_SALDO": {
         "text": "Corrección de Saldo",
-        "color": "#2196F3",  # Azul
+        "color": "#2196F3",
         "icon": "🔧"
     },
     "EXTENSION_VALIDEZ": {
         "text": "Extensión de Validez",
-        "color": "#9C27B0",  # Púrpura
+        "color": "#9C27B0",
         "icon": "📅"
     },
     "DESVINCULACION": {
         "text": "Desvinculación de cuenta",
-        "color": "#F44336",  # Rojo
+        "color": "#F44336",
         "icon": "🔓"
     },
     "VINCULACION": {
         "text": "Vinculación de cuenta",
-        "color": "#00BCD4",  # Cyan
+        "color": "#00BCD4",
         "icon": "🔗"
     },
     "BONUS": {
         "text": "Bonificación",
-        "color": "#8BC34A",  # Verde claro
+        "color": "#8BC34A",
         "icon": "🎁"
     },
     "PENALIZACION": {
         "text": "Penalización",
-        "color": "#E91E63",  # Rosa
+        "color": "#E91E63",
         "icon": "⚠️"
     }
 }
 
 # ============================================================
-#  ROLES DEL SISTEMA (NUEVO)
+#  ROLES DEL SISTEMA
 # ============================================================
 USER_ROLES = {
     "ADMIN": {
@@ -252,35 +247,28 @@ USER_ROLES = {
 #  FUNCIONES HELPER
 # ============================================================
 def ensure_directories():
-    """Crea los directorios necesarios si no existen"""
     for directory in [LOG_DIR, DATA_DIR]:
         if not os.path.exists(directory):
             os.makedirs(directory)
             print(f"✓ Directorio creado: {directory}")
 
 def get_timestamp():
-    """Retorna timestamp actual en formato ISO"""
     return datetime.now().isoformat()
 
 def get_account_config(username: str = None) -> dict:
-    """Obtiene la configuración de una cuenta Tigo"""
     if username is None:
         username = DEFAULT_TIGO_USER
     return TIGO_ACCOUNTS.get(username, TIGO_ACCOUNTS[DEFAULT_TIGO_USER])
 
 def print_config_info():
-    """Imprime información de configuración al inicio"""
     print("=" * 60)
     print("CONFIGURACIÓN DEL SISTEMA - API TIGO v2.2")
     print("=" * 60)
     print(f"Cuentas disponibles: {list(TIGO_ACCOUNTS.keys())}")
     print(f"Base DIR: {BASE_DIR}")
-    print(f"Archivo OTP: {OTP_FILE}")
     print(f"Puerto API: {API_PORT}")
-    print(f"Puerto SMS: {SMS_RECEIVER_PORT}")
     print(f"Bearer Token: {'Configurado' if SHARED_BEARER_TOKEN else 'NO CONFIGURADO'}")
     print(f"Roles habilitados: {list(USER_ROLES.keys())}")
     print("=" * 60)
 
-# Crear directorios al importar
 ensure_directories()

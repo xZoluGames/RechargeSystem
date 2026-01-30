@@ -3,16 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel Usuario - Recargas Tigo</title>
+    <title>Panel Revendedor - Recargas Tigo</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         :root {
             --primary: #667eea;
             --secondary: #764ba2;
+            --reseller: #f5a623;
         }
         body { background: #f5f7fa; font-family: 'Segoe UI', system-ui, sans-serif; }
-        .navbar { background: linear-gradient(135deg, var(--primary), var(--secondary)); }
+        .navbar { background: linear-gradient(135deg, var(--reseller), #e69500); }
         .balance-card {
             background: linear-gradient(135deg, var(--primary), var(--secondary));
             color: white;
@@ -25,16 +26,35 @@
             border-radius: 15px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.05);
         }
-        .category-header {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            color: white;
-            padding: 10px 15px;
-            border-radius: 10px;
+        .user-card {
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 15px;
             margin-bottom: 10px;
-            cursor: pointer;
+            transition: all 0.2s;
         }
-        .category-header:hover { opacity: 0.9; }
-        .category-header .icon { font-size: 20px; margin-right: 10px; }
+        .user-card:hover { border-color: var(--reseller); background: #fffbf0; }
+        .user-card .balance-info {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #eee;
+        }
+        .nav-pills .nav-link.active { background: var(--reseller); }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border: none;
+        }
+        .status-badge {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        .status-ok { background: #d4edda; color: #155724; }
+        .status-low { background: #fff3cd; color: #856404; }
+        .status-empty { background: #f8d7da; color: #721c24; }
         .package-item {
             border: 2px solid #e9ecef;
             border-radius: 12px;
@@ -45,29 +65,24 @@
         }
         .package-item:hover { border-color: var(--primary); background: #f8f9ff; }
         .package-item.selected { border-color: var(--primary); background: #e7eaff; }
-        .nav-pills .nav-link.active { background: var(--primary); }
-        .btn-primary {
+        .category-header {
             background: linear-gradient(135deg, var(--primary), var(--secondary));
-            border: none;
-        }
-        .loading { display: none; }
-        .loading.show { display: block; }
-        .modification-item {
-            border-left: 4px solid #667eea;
+            color: white;
             padding: 10px 15px;
+            border-radius: 10px;
             margin-bottom: 10px;
-            background: #f8f9fa;
-            border-radius: 0 8px 8px 0;
+            cursor: pointer;
         }
-        .modification-item .icon { font-size: 18px; margin-right: 8px; }
     </style>
 </head>
 <body>
     <nav class="navbar navbar-dark">
         <div class="container-fluid">
-            <span class="navbar-brand"><i class="fas fa-mobile-alt me-2"></i>Recargas Tigo</span>
+            <span class="navbar-brand">
+                <i class="fas fa-store me-2"></i>Panel Revendedor
+            </span>
             <div class="d-flex align-items-center">
-                <span class="text-white me-3" id="userInfo"></span>
+                <span class="text-white me-3" id="userInfo">🏪 Revendedor</span>
                 <button class="btn btn-outline-light btn-sm" onclick="logout()">
                     <i class="fas fa-sign-out-alt"></i>
                 </button>
@@ -76,9 +91,9 @@
     </nav>
 
     <div class="container mt-4">
-        <!-- Balance -->
+        <!-- Balance del Revendedor -->
         <div class="balance-card mb-4">
-            <small style="opacity: 0.9;">Saldo Disponible</small>
+            <small style="opacity: 0.9;">Tu Saldo Disponible</small>
             <h1 id="balance">Gs. 0</h1>
             <small id="keyInfo" style="opacity: 0.8;"></small>
         </div>
@@ -91,32 +106,50 @@
                     <input type="text" class="form-control" id="apiKey" placeholder="Ingresa tu clave de API">
                     <button class="btn btn-primary" onclick="loadBalance()">Cargar</button>
                 </div>
-                <small class="text-muted">Ingresa la clave que te proporcionó el administrador</small>
             </div>
         </div>
 
         <!-- Tabs -->
         <ul class="nav nav-pills mb-4" role="tablist">
             <li class="nav-item">
-                <a class="nav-link active" data-bs-toggle="tab" href="#recharge">
+                <a class="nav-link active" data-bs-toggle="tab" href="#users">
+                    <i class="fas fa-users me-1"></i>Mis Usuarios
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" data-bs-toggle="tab" href="#recharge">
                     <i class="fas fa-mobile-alt me-1"></i>Recargar
                 </a>
             </li>
             <li class="nav-item">
                 <a class="nav-link" data-bs-toggle="tab" href="#history">
-                    <i class="fas fa-history me-1"></i>Historial
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" data-bs-toggle="tab" href="#modifications">
-                    <i class="fas fa-clipboard-list me-1"></i>Cambios
+                    <i class="fas fa-history me-1"></i>Mi Historial
                 </a>
             </li>
         </ul>
 
         <div class="tab-content">
-            <!-- Tab Recargar -->
-            <div class="tab-pane fade show active" id="recharge">
+            <!-- Tab Usuarios Asignados -->
+            <div class="tab-pane fade show active" id="users">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="mb-0"><i class="fas fa-users me-2"></i>Usuarios Asignados</h5>
+                            <button class="btn btn-outline-primary btn-sm" onclick="loadAssignedUsers()">
+                                <i class="fas fa-sync me-1"></i>Actualizar
+                            </button>
+                        </div>
+                        <p class="text-muted">Aquí puedes ver el estado de los usuarios que tienes asignados</p>
+                        
+                        <div id="usersList">
+                            <p class="text-muted">Cargando...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab Recargar (igual que usuario normal) -->
+            <div class="tab-pane fade" id="recharge">
                 <div class="card mb-4">
                     <div class="card-body">
                         <h5><i class="fas fa-phone me-2"></i>Número de Destino</h5>
@@ -130,22 +163,14 @@
                     </div>
                 </div>
 
-                <!-- Paquetes por Categorías -->
                 <div class="card" id="packagesCard" style="display:none;">
                     <div class="card-body">
                         <h5><i class="fas fa-box me-2"></i>Selecciona un Paquete</h5>
-                        
-                        <div class="loading text-center py-4" id="packagesLoading">
-                            <div class="spinner-border text-primary"></div>
-                            <p class="mt-2">Cargando paquetes...</p>
-                        </div>
-
                         <div id="packagesList"></div>
                         <div id="packagesError" class="alert alert-danger" style="display:none;"></div>
                     </div>
                 </div>
 
-                <!-- Confirmar -->
                 <div class="card mt-4" id="confirmCard" style="display:none;">
                     <div class="card-body">
                         <h5><i class="fas fa-check-circle me-2"></i>Confirmar Recarga</h5>
@@ -162,19 +187,8 @@
             <div class="tab-pane fade" id="history">
                 <div class="card">
                     <div class="card-body">
-                        <h5><i class="fas fa-history me-2"></i>Historial de Recargas</h5>
+                        <h5><i class="fas fa-history me-2"></i>Mi Historial de Recargas</h5>
                         <div id="historyList"></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Tab Modificaciones -->
-            <div class="tab-pane fade" id="modifications">
-                <div class="card">
-                    <div class="card-body">
-                        <h5><i class="fas fa-clipboard-list me-2"></i>Cambios en tu Clave</h5>
-                        <p class="text-muted">Aquí puedes ver los cambios realizados por el administrador</p>
-                        <div id="modificationsList"></div>
                     </div>
                 </div>
             </div>
@@ -199,8 +213,9 @@
     <script>
         const token = localStorage.getItem('token');
         const telegramId = localStorage.getItem('telegramId');
+        const isReseller = localStorage.getItem('isReseller') === 'true';
         
-        if (!token) window.location.href = '/';
+        if (!token || !isReseller) window.location.href = '/';
 
         let apiKey = localStorage.getItem('apiKey') || '';
         let packagesByCategory = {};
@@ -214,11 +229,12 @@
         };
 
         // Inicializar
-        document.getElementById('userInfo').textContent = 'ID: ' + telegramId;
+        document.getElementById('userInfo').textContent = '🏪 ID: ' + telegramId;
         if (apiKey) {
             document.getElementById('apiKey').value = apiKey;
             loadBalance();
         }
+        loadAssignedUsers();
 
         async function loadBalance() {
             apiKey = document.getElementById('apiKey').value.trim();
@@ -237,8 +253,7 @@
                     currentBalance = data.balance.remaining;
                     document.getElementById('balance').textContent = 'Gs. ' + currentBalance.toLocaleString();
                     document.getElementById('keyInfo').textContent = 
-                        `Válida hasta: ${new Date(data.key_info.expires).toLocaleDateString()} | ` +
-                        `Rol: ${data.key_info.role || 'Usuario'}`;
+                        `Válida hasta: ${new Date(data.key_info.expires).toLocaleDateString()}`;
                     loadHistory();
                 } else {
                     document.getElementById('balance').textContent = 'Clave inválida';
@@ -246,6 +261,62 @@
                 }
             } catch (e) {
                 console.error(e);
+            }
+        }
+
+        async function loadAssignedUsers() {
+            try {
+                const resp = await fetch('/api/reseller/users', { headers });
+                const data = await resp.json();
+
+                const container = document.getElementById('usersList');
+
+                if (data.success && data.users && data.users.length > 0) {
+                    container.innerHTML = data.users.map(u => {
+                        const remaining = u.remaining || 0;
+                        let statusClass = 'status-ok';
+                        let statusText = 'OK';
+                        
+                        if (remaining <= 0) {
+                            statusClass = 'status-empty';
+                            statusText = 'Sin saldo';
+                        } else if (remaining < 50000) {
+                            statusClass = 'status-low';
+                            statusText = 'Saldo bajo';
+                        }
+
+                        return `
+                            <div class="user-card">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <strong>${u.telegram_username || 'Sin username'}</strong>
+                                        <br><small class="text-muted">ID: ${u.telegram_id}</small>
+                                    </div>
+                                    <span class="status-badge ${statusClass}">${statusText}</span>
+                                </div>
+                                <div class="balance-info">
+                                    <div>
+                                        <small class="text-muted">Disponible</small><br>
+                                        <strong class="text-success">Gs. ${remaining.toLocaleString()}</strong>
+                                    </div>
+                                    <div>
+                                        <small class="text-muted">Usado</small><br>
+                                        <strong>Gs. ${(u.used_amount || 0).toLocaleString()}</strong>
+                                    </div>
+                                    <div>
+                                        <small class="text-muted">Válido hasta</small><br>
+                                        <strong>${u.expires ? new Date(u.expires).toLocaleDateString() : '-'}</strong>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                } else {
+                    container.innerHTML = '<p class="text-muted">No tienes usuarios asignados. Contacta al administrador.</p>';
+                }
+            } catch (e) {
+                console.error(e);
+                document.getElementById('usersList').innerHTML = '<p class="text-danger">Error cargando usuarios</p>';
             }
         }
 
@@ -257,8 +328,7 @@
             }
 
             document.getElementById('packagesCard').style.display = 'block';
-            document.getElementById('packagesLoading').classList.add('show');
-            document.getElementById('packagesList').innerHTML = '';
+            document.getElementById('packagesList').innerHTML = '<div class="text-center py-3"><div class="spinner-border"></div></div>';
             document.getElementById('packagesError').style.display = 'none';
             document.getElementById('confirmCard').style.display = 'none';
 
@@ -273,7 +343,7 @@
                 if (data.success) {
                     allPackages = data.packages || [];
                     packagesByCategory = data.by_category || {};
-                    renderPackagesByCategory();
+                    renderPackages();
                 } else {
                     document.getElementById('packagesError').textContent = data.error || 'Error';
                     document.getElementById('packagesError').style.display = 'block';
@@ -281,94 +351,67 @@
             } catch (e) {
                 document.getElementById('packagesError').textContent = 'Error de conexión';
                 document.getElementById('packagesError').style.display = 'block';
-            } finally {
-                document.getElementById('packagesLoading').classList.remove('show');
             }
         }
 
-        function renderPackagesByCategory() {
+        function renderPackages() {
             const container = document.getElementById('packagesList');
-            container.innerHTML = '';
+            let html = '';
 
-            if (Object.keys(packagesByCategory).length === 0) {
-                container.innerHTML = '<p class="text-muted">No hay paquetes disponibles</p>';
-                return;
-            }
-
-            // Ordenar categorías
             const categoryOrder = ['INTERNET_Y_LLAMADAS', 'ILIMITADOS', 'VOZ', 'OTROS'];
             
             for (const catKey of categoryOrder) {
                 const cat = packagesByCategory[catKey];
                 if (!cat || cat.packages.length === 0) continue;
 
-                // Header de categoría
-                const catDiv = document.createElement('div');
-                catDiv.className = 'mb-3';
-                catDiv.innerHTML = `
+                html += `
                     <div class="category-header" onclick="toggleCategory('${catKey}')">
-                        <span class="icon">${cat.icon}</span>
+                        <span>${cat.icon}</span>
                         <strong>${cat.name}</strong>
-                        <span class="float-end">
-                            ${cat.count} paquetes
-                            <i class="fas fa-chevron-down ms-2" id="chevron-${catKey}"></i>
-                        </span>
+                        <span class="float-end">${cat.count} paquetes</span>
                     </div>
-                    <div class="category-packages" id="packages-${catKey}">
-                        ${cat.packages.map((pkg, i) => renderPackageItem(pkg, catKey + '-' + i)).join('')}
-                    </div>
+                    <div id="packages-${catKey}">
                 `;
-                container.appendChild(catDiv);
-            }
-        }
 
-        function renderPackageItem(pkg, index) {
-            const affordable = pkg.amount <= currentBalance;
-            return `
-                <div class="package-item ${affordable ? '' : 'opacity-50'}" 
-                     onclick="${affordable ? `selectPackage('${pkg.id}')` : ''}"
-                     id="pkg-${pkg.id}">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <strong>${pkg.name}</strong>
-                            ${pkg.description ? '<br><small class="text-muted">' + pkg.description + '</small>' : ''}
+                cat.packages.forEach(pkg => {
+                    const affordable = pkg.amount <= currentBalance;
+                    html += `
+                        <div class="package-item ${affordable ? '' : 'opacity-50'}" 
+                             onclick="${affordable ? `selectPackage('${pkg.id}')` : ''}"
+                             id="pkg-${pkg.id}">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong>${pkg.name}</strong>
+                                    ${pkg.description ? '<br><small class="text-muted">' + pkg.description + '</small>' : ''}
+                                </div>
+                                <div class="text-end">
+                                    <strong class="text-primary">Gs. ${pkg.amount.toLocaleString()}</strong>
+                                    ${!affordable ? '<br><small class="text-danger">Saldo insuficiente</small>' : ''}
+                                </div>
+                            </div>
                         </div>
-                        <div class="text-end">
-                            <strong class="text-primary">Gs. ${pkg.amount.toLocaleString()}</strong>
-                            ${!affordable ? '<br><small class="text-danger">Saldo insuficiente</small>' : ''}
-                        </div>
-                    </div>
-                </div>
-            `;
+                    `;
+                });
+
+                html += '</div>';
+            }
+
+            container.innerHTML = html || '<p class="text-muted">No hay paquetes</p>';
         }
 
         function toggleCategory(catKey) {
-            const packagesDiv = document.getElementById('packages-' + catKey);
-            const chevron = document.getElementById('chevron-' + catKey);
-            
-            if (packagesDiv.style.display === 'none') {
-                packagesDiv.style.display = 'block';
-                chevron.classList.remove('fa-chevron-right');
-                chevron.classList.add('fa-chevron-down');
-            } else {
-                packagesDiv.style.display = 'none';
-                chevron.classList.remove('fa-chevron-down');
-                chevron.classList.add('fa-chevron-right');
-            }
+            const div = document.getElementById('packages-' + catKey);
+            div.style.display = div.style.display === 'none' ? 'block' : 'none';
         }
 
         function selectPackage(pkgId) {
-            // Quitar selección anterior
             document.querySelectorAll('.package-item').forEach(el => el.classList.remove('selected'));
             
-            // Buscar paquete
             selectedPackage = allPackages.find(p => p.id === pkgId);
             if (!selectedPackage) return;
 
-            // Marcar seleccionado
             document.getElementById('pkg-' + pkgId).classList.add('selected');
 
-            // Mostrar confirmación
             const dest = document.getElementById('destination').value;
             document.getElementById('confirmDetails').innerHTML = `
                 <strong>Destino:</strong> ${dest}<br>
@@ -433,10 +476,9 @@
                 const resp = await fetch('/api/history?api_key=' + encodeURIComponent(apiKey), { headers });
                 const data = await resp.json();
 
-                // Historial de recargas
-                const historyContainer = document.getElementById('historyList');
+                const container = document.getElementById('historyList');
                 if (data.success && data.recharges && data.recharges.length > 0) {
-                    historyContainer.innerHTML = data.recharges.map(h => `
+                    container.innerHTML = data.recharges.map(h => `
                         <div class="d-flex justify-content-between align-items-center border-bottom py-2">
                             <div>
                                 <strong>${h.destination}</strong>
@@ -448,44 +490,7 @@
                         </div>
                     `).join('');
                 } else {
-                    historyContainer.innerHTML = '<p class="text-muted">No hay historial de recargas</p>';
-                }
-
-                // Historial de modificaciones
-                const modsContainer = document.getElementById('modificationsList');
-                if (data.modifications && data.modifications.length > 0) {
-                    modsContainer.innerHTML = data.modifications.map(m => {
-                        const preset = m.preset_info || {};
-                        const borderColor = preset.color || '#667eea';
-                        const icon = preset.icon || '📋';
-                        const noteText = preset.text || m.type;
-                        
-                        let details = '';
-                        if (m.details) {
-                            if (m.details.max_amount) {
-                                details += `<br><small>Saldo: Gs. ${m.details.max_amount.old?.toLocaleString() || '?'} → Gs. ${m.details.max_amount.new?.toLocaleString() || '?'}</small>`;
-                            }
-                            if (m.details.expires) {
-                                details += `<br><small>Validez actualizada</small>`;
-                            }
-                        }
-                        
-                        return `
-                            <div class="modification-item" style="border-left-color: ${borderColor}">
-                                <div class="d-flex justify-content-between">
-                                    <div>
-                                        <span class="icon">${icon}</span>
-                                        <strong>${noteText}</strong>
-                                        ${details}
-                                        ${m.admin_note ? `<br><small class="text-muted">"${m.admin_note}"</small>` : ''}
-                                    </div>
-                                    <small class="text-muted">${new Date(m.timestamp).toLocaleString()}</small>
-                                </div>
-                            </div>
-                        `;
-                    }).join('');
-                } else {
-                    modsContainer.innerHTML = '<p class="text-muted">No hay cambios registrados</p>';
+                    container.innerHTML = '<p class="text-muted">No hay historial</p>';
                 }
             } catch (e) {
                 console.error(e);
@@ -498,7 +503,6 @@
             window.location.href = '/';
         }
 
-        // Enter key
         document.getElementById('destination').addEventListener('keypress', e => {
             if (e.key === 'Enter') loadPackages();
         });

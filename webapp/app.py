@@ -2,11 +2,13 @@
 # -*- coding: utf-8 -*-
 """
 app.py - WebApp para Sistema de Recargas Tigo
-MODIFICADO:
+MODIFICADO v2.2:
 - Bearer token obligatorio en todas las solicitudes a la API
-- Soporte para roles (admin, revendedor, usuario)
+- Soporte para roles: admin, revendedor, usuario
 - Endpoints para modificación de claves
 - Soporte para categorías de paquetes
+- Recargas de admin sin límite
+- Historial de modificaciones
 """
 
 from flask import Flask, render_template, request, jsonify
@@ -103,7 +105,7 @@ def verify_otp_code(telegram_id: int, otp_code: str) -> bool:
 # ============================================================
 def create_token(telegram_id: int, is_admin: bool = False, 
                 is_reseller: bool = False, remember: bool = False) -> str:
-    """Crea un token JWT"""
+    """Crea un token JWT con soporte para roles"""
     hours = SESSION_REMEMBER_HOURS if remember else SESSION_HOURS
     payload = {
         'telegram_id': telegram_id,
@@ -175,28 +177,32 @@ def require_reseller_or_admin(f):
 
 
 # ============================================================
-# HELPER: API REQUEST
+# HELPER: API REQUEST CON BEARER TOKEN
 # ============================================================
 def api_request(method: str, endpoint: str, data: dict = None, 
                is_admin: bool = False, api_key: str = None,
                telegram_id: int = None):
     """
-    Hace request a la API REST con Bearer token obligatorio
+    Hace request a la API REST con Bearer token OBLIGATORIO
     """
     url = f"{API_URL}{endpoint}"
     
+    # Bearer token siempre incluido
     headers = {
         'Content-Type': 'application/json',
         'Authorization': f'Bearer {SHARED_BEARER_TOKEN}'
     }
     
+    # Credenciales de admin
     if is_admin:
         headers['X-Admin-Key'] = ADMIN_API_KEY
         headers['X-Admin-Password'] = ADMIN_API_PASSWORD
     
+    # API Key del usuario
     if api_key:
         headers['X-API-Key'] = api_key
     
+    # Telegram ID para verificación
     if telegram_id:
         headers['X-Telegram-ID'] = str(telegram_id)
     
@@ -244,7 +250,7 @@ def reseller_page():
 # ============================================================
 @app.route('/api/auth/verify-otp', methods=['POST'])
 def auth_verify_otp():
-    """Verifica OTP y devuelve token"""
+    """Verifica OTP y devuelve token con rol"""
     try:
         data = request.get_json()
         telegram_id = data.get('telegram_id')
@@ -262,7 +268,7 @@ def auth_verify_otp():
         
         is_admin = telegram_id == ADMIN_TELEGRAM_ID
         
-        # Verificar si es revendedor consultando la API
+        # Verificar si es revendedor
         is_reseller = False
         if not is_admin:
             result, _ = api_request('GET', f'/api/admin/resellers/{telegram_id}', is_admin=True)
@@ -271,13 +277,15 @@ def auth_verify_otp():
         
         token = create_token(telegram_id, is_admin, is_reseller, remember)
         
-        # Determinar redirección
+        # Determinar redirección según rol
         if is_admin:
             redirect = '/admin'
         elif is_reseller:
             redirect = '/reseller'
         else:
             redirect = '/user'
+        
+        logger.info(f"Login exitoso: {telegram_id} (admin: {is_admin}, reseller: {is_reseller})")
         
         return jsonify({
             'success': True,
@@ -444,7 +452,7 @@ def admin_health():
 @app.route('/api/admin/status', methods=['GET'])
 @require_admin
 def admin_status():
-    """Estado completo"""
+    """Estado completo del sistema"""
     result, error = api_request('GET', '/api/admin/status', is_admin=True)
     
     if error:
@@ -456,7 +464,7 @@ def admin_status():
 @app.route('/api/admin/recharge', methods=['POST'])
 @require_admin
 def admin_recharge():
-    """Recarga de admin sin límite"""
+    """Recarga de admin SIN LÍMITE"""
     data = request.get_json()
     
     result, error = api_request('POST', '/api/admin/recharge', data, is_admin=True)
@@ -467,10 +475,25 @@ def admin_recharge():
     return jsonify(result)
 
 
+@app.route('/api/admin/packages', methods=['POST'])
+@require_admin
+def admin_packages():
+    """Admin obtiene paquetes para sus recargas"""
+    data = request.get_json()
+    
+    # Admin usa endpoint especial que no requiere API key
+    result, error = api_request('POST', '/api/packages', data, is_admin=True)
+    
+    if error:
+        return jsonify({'success': False, 'error': error}), 500
+    
+    return jsonify(result)
+
+
 @app.route('/api/admin/keys', methods=['GET', 'POST'])
 @require_admin
 def admin_keys():
-    """Gestionar claves"""
+    """Listar o crear claves"""
     if request.method == 'GET':
         result, error = api_request('GET', '/api/admin/keys', is_admin=True)
     else:
@@ -615,7 +638,7 @@ def admin_history():
 @app.route('/api/admin/note-presets', methods=['GET'])
 @require_admin
 def admin_note_presets():
-    """Obtener presets de notas"""
+    """Obtener presets de notas administrativas"""
     result, error = api_request('GET', '/api/note-presets', is_admin=True)
     
     if error:
@@ -627,7 +650,7 @@ def admin_note_presets():
 @app.route('/api/admin/auth/<action>', methods=['POST'])
 @require_admin
 def admin_auth_action(action):
-    """Acciones de auth"""
+    """Acciones de autenticación Tigo"""
     endpoint_map = {
         'init': '/api/admin/auth/init',
         'refresh': '/api/admin/auth/refresh',
@@ -639,7 +662,8 @@ def admin_auth_action(action):
     if not endpoint:
         return jsonify({'success': False, 'error': 'Acción no válida'}), 400
     
-    result, error = api_request('POST', endpoint, is_admin=True)
+    data = request.get_json() or {}
+    result, error = api_request('POST', endpoint, data, is_admin=True)
     
     if error:
         return jsonify({'success': False, 'error': error}), 500
@@ -651,7 +675,8 @@ def admin_auth_action(action):
 # MAIN
 # ============================================================
 if __name__ == '__main__':
-    logger.info(f"Iniciando WebApp en {WEB_HOST}:{WEB_PORT}")
+    logger.info(f"Iniciando WebApp v2.2 en {WEB_HOST}:{WEB_PORT}")
     logger.info(f"API URL: {API_URL}")
     logger.info(f"Bearer Token: {'Configurado' if SHARED_BEARER_TOKEN else 'No'}")
+    logger.info(f"Archivo OTP: {OTP_FILE}")
     app.run(host=WEB_HOST, port=WEB_PORT, debug=False)
