@@ -1,286 +1,672 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-key_manager.py - Gestión de claves de API
-Versión simplificada para API REST pura
+key_manager.py - Gestor de Claves de API
+MODIFICADO:
+- Vinculación de clave a Telegram ID (1 clave por usuario)
+- Historial de modificaciones visibles para el usuario
+- Soporte para notas administrativas con colores
+- Gestión de roles (revendedor)
 """
 
 import json
-import random
-import string
-import logging
-from datetime import datetime, timedelta
-from typing import Dict, Tuple, Optional, List
 import os
+import secrets
+import string
+from datetime import datetime, timedelta
+from typing import Dict, List, Optional, Tuple
+import logging
 
-from config import KEYS_FILE, DATA_DIR
+from config import (
+    KEYS_FILE,
+    KEY_MODIFICATIONS_FILE,
+    RESELLERS_FILE,
+    ADMIN_NOTES_PRESETS,
+    DATA_DIR
+)
 
 logger = logging.getLogger(__name__)
 
+# Asegurar que existe el directorio
+os.makedirs(DATA_DIR, exist_ok=True)
+
 
 class KeyManager:
-    """Gestiona las claves de API"""
+    """Gestor de claves de API con vinculación a Telegram ID"""
     
-    def __init__(self, keys_file: str = None):
-        self.keys_file = keys_file or KEYS_FILE
-        self._ensure_file_exists()
+    def __init__(self):
+        self.keys_file = KEYS_FILE
+        self.modifications_file = KEY_MODIFICATIONS_FILE
+        self.resellers_file = RESELLERS_FILE
+        self._ensure_files()
     
-    def _ensure_file_exists(self):
-        """Crea el archivo si no existe"""
-        os.makedirs(os.path.dirname(self.keys_file), exist_ok=True)
-        
-        if not os.path.exists(self.keys_file):
-            with open(self.keys_file, 'w') as f:
-                json.dump({}, f)
+    def _ensure_files(self):
+        """Asegura que los archivos existen"""
+        for filepath in [self.keys_file, self.modifications_file, self.resellers_file]:
+            if not os.path.exists(filepath):
+                with open(filepath, 'w') as f:
+                    json.dump({}, f)
     
-    def load_keys(self) -> Dict:
-        """Carga todas las claves"""
+    def _load_keys(self) -> Dict:
+        """Carga las claves desde el archivo"""
         try:
-            with open(self.keys_file, 'r') as f:
+            with open(self.keys_file, 'r', encoding='utf-8') as f:
                 return json.load(f)
-        except (FileNotFoundError, json.JSONDecodeError):
-            self._ensure_file_exists()
+        except:
             return {}
     
-    def save_keys(self, keys: Dict) -> bool:
-        """Guarda las claves"""
-        try:
-            with open(self.keys_file, 'w') as f:
-                json.dump(keys, f, indent=2, ensure_ascii=False)
-            return True
-        except Exception as e:
-            logger.error(f"Error guardando claves: {e}")
-            return False
+    def _save_keys(self, keys: Dict):
+        """Guarda las claves en el archivo"""
+        with open(self.keys_file, 'w', encoding='utf-8') as f:
+            json.dump(keys, f, ensure_ascii=False, indent=2)
     
-    def generate_key(self, max_amount: int, valid_days: int = 30,
-                    description: str = "") -> Optional[str]:
+    def _load_modifications(self) -> Dict:
+        """Carga historial de modificaciones"""
+        try:
+            with open(self.modifications_file, 'r', encoding='utf-8') as f:
+                return json.load(f)
+        except:
+            return {}
+    
+    def _save_modifications(self, mods: Dict):
+        """Guarda historial de modificaciones"""
+        with open(self.modifications_file, 'w', encoding='utf-8') as f:
+            json.dump(mods, f, ensure_ascii=False, indent=2)
+    
+    def _load_resellers(self) -> Dict:
+        """Carga datos de revendedores"""
+        try:
+            with open(self.resellers_file, 'r', encoding='utf-8') as f:
+                return json.load(f)
+        except:
+            return {}
+    
+    def _save_resellers(self, resellers: Dict):
+        """Guarda datos de revendedores"""
+        with open(self.resellers_file, 'w', encoding='utf-8') as f:
+            json.dump(resellers, f, ensure_ascii=False, indent=2)
+    
+    def _generate_key_string(self) -> str:
+        """Genera una clave única"""
+        chars = string.ascii_uppercase + string.digits
+        segments = [
+            ''.join(secrets.choice(chars) for _ in range(4))
+            for _ in range(4)
+        ]
+        return "TG-" + "-".join(segments)
+    
+    def _add_modification(self, key: str, mod_type: str, details: Dict, 
+                         admin_note: str = None, note_preset: str = None):
         """
-        Genera una nueva clave
+        Agrega una modificación al historial
+        
+        Args:
+            key: Clave modificada
+            mod_type: Tipo de modificación
+            details: Detalles del cambio
+            admin_note: Nota personalizada del admin
+            note_preset: Preset de nota (ej: "CARGA_SALDO")
+        """
+        mods = self._load_modifications()
+        
+        if key not in mods:
+            mods[key] = []
+        
+        # Obtener info del preset si existe
+        preset_info = None
+        if note_preset and note_preset in ADMIN_NOTES_PRESETS:
+            preset_info = ADMIN_NOTES_PRESETS[note_preset]
+        
+        modification = {
+            "timestamp": datetime.now().isoformat(),
+            "type": mod_type,
+            "details": details,
+            "note_preset": note_preset,
+            "preset_info": preset_info,
+            "admin_note": admin_note,
+            "visible_to_user": True
+        }
+        
+        mods[key].insert(0, modification)
+        mods[key] = mods[key][:100]  # Mantener últimas 100
+        
+        self._save_modifications(mods)
+    
+    def generate_key(self, max_amount: int, valid_days: int = 30, 
+                    description: str = "", telegram_id: int = None) -> Optional[str]:
+        """
+        Genera una nueva clave de API
         
         Args:
             max_amount: Monto máximo permitido
             valid_days: Días de validez
-            description: Descripción opcional
-            
-        Returns:
-            La clave generada o None
+            description: Descripción de la clave
+            telegram_id: ID de Telegram a vincular (opcional)
         """
         try:
-            key = ''.join(random.choices(string.ascii_uppercase + string.digits, k=16))
-            keys = self.load_keys()
+            keys = self._load_keys()
             
+            # Verificar si el telegram_id ya tiene una clave activa
+            if telegram_id:
+                existing_key = self.get_key_by_telegram_id(telegram_id)
+                if existing_key:
+                    logger.warning(f"Telegram ID {telegram_id} ya tiene clave activa: {existing_key[:8]}...")
+                    return None
+            
+            key = self._generate_key_string()
+            
+            # Asegurar unicidad
             while key in keys:
-                key = ''.join(random.choices(string.ascii_uppercase + string.digits, k=16))
+                key = self._generate_key_string()
+            
+            now = datetime.now()
+            expires = now + timedelta(days=valid_days)
             
             keys[key] = {
-                'created': datetime.now().isoformat(),
-                'expires': (datetime.now() + timedelta(days=valid_days)).isoformat(),
-                'max_amount': max_amount,
-                'used_amount': 0,
-                'active': True,
-                'use_count': 0,
-                'description': description,
-                'last_used': None
+                "max_amount": max_amount,
+                "used_amount": 0,
+                "created": now.isoformat(),
+                "expires": expires.isoformat(),
+                "description": description,
+                "active": True,
+                "use_count": 0,
+                "telegram_id": telegram_id,
+                "telegram_username": None,
+                "role": "USER",  # USER, RESELLER
+                "last_used": None
             }
             
-            if self.save_keys(keys):
-                logger.info(f"Clave generada: {key[:8]}... - Monto: {max_amount}")
-                return key
-            return None
+            self._save_keys(keys)
+            
+            # Registrar creación
+            self._add_modification(key, "CREATION", {
+                "max_amount": max_amount,
+                "valid_days": valid_days,
+                "telegram_id": telegram_id
+            }, note_preset="VINCULACION" if telegram_id else None)
+            
+            logger.info(f"Clave generada: {key[:8]}... - Monto: {max_amount:,}")
+            return key
             
         except Exception as e:
             logger.error(f"Error generando clave: {e}")
             return None
     
-    def validate_key(self, key: str, amount: int = 0) -> Tuple[bool, str]:
+    def validate_key(self, key: str, telegram_id: int = None) -> Tuple[bool, str]:
         """
-        Valida una clave
+        Valida una clave de API
         
         Args:
             key: Clave a validar
-            amount: Monto a verificar (opcional)
-            
+            telegram_id: ID de Telegram del usuario (para verificar vinculación)
+        
         Returns:
-            Tuple (es_válida, mensaje)
+            Tuple (válida, mensaje)
         """
-        keys = self.load_keys()
+        keys = self._load_keys()
         
         if key not in keys:
-            return False, "Clave inválida"
+            return False, "Clave no encontrada"
         
-        key_data = keys[key]
+        key_info = keys[key]
         
-        if not key_data.get('active', True):
+        if not key_info.get('active', True):
             return False, "Clave desactivada"
         
-        try:
-            expires = datetime.fromisoformat(key_data['expires'])
-            if datetime.now() > expires:
-                return False, "Clave expirada"
-        except:
-            return False, "Error en fecha de expiración"
+        # Verificar expiración
+        expires = datetime.fromisoformat(key_info['expires'])
+        if datetime.now() > expires:
+            return False, "Clave expirada"
         
-        remaining = key_data['max_amount'] - key_data.get('used_amount', 0)
+        # Verificar vinculación a Telegram ID
+        linked_telegram = key_info.get('telegram_id')
+        if linked_telegram and telegram_id:
+            if linked_telegram != telegram_id:
+                return False, "Esta clave está vinculada a otro usuario"
         
+        # Verificar saldo
+        remaining = key_info['max_amount'] - key_info.get('used_amount', 0)
         if remaining <= 0:
-            return False, "Clave sin saldo"
+            return False, "Saldo agotado"
         
-        if amount > 0 and amount > remaining:
-            return False, f"Saldo insuficiente. Disponible: Gs. {remaining:,}"
+        return True, "OK"
+    
+    def get_key_info(self, key: str) -> Optional[Dict]:
+        """Obtiene información de una clave"""
+        keys = self._load_keys()
+        return keys.get(key)
+    
+    def get_key_by_telegram_id(self, telegram_id: int) -> Optional[str]:
+        """
+        Busca una clave activa por Telegram ID
         
-        return True, f"OK - Saldo disponible: Gs. {remaining:,}"
+        Returns:
+            La clave si existe y está activa, None si no
+        """
+        keys = self._load_keys()
+        
+        for key, info in keys.items():
+            if info.get('telegram_id') == telegram_id:
+                if info.get('active', True):
+                    expires = datetime.fromisoformat(info['expires'])
+                    if datetime.now() < expires:
+                        return key
+        
+        return None
+    
+    def get_remaining_balance(self, key: str) -> int:
+        """Obtiene el saldo restante de una clave"""
+        info = self.get_key_info(key)
+        if not info:
+            return 0
+        return info['max_amount'] - info.get('used_amount', 0)
     
     def use_amount(self, key: str, amount: int) -> bool:
-        """Registra uso de un monto"""
+        """Registra uso de saldo"""
         try:
-            keys = self.load_keys()
+            keys = self._load_keys()
             
             if key not in keys:
                 return False
             
             keys[key]['used_amount'] = keys[key].get('used_amount', 0) + amount
-            keys[key]['last_used'] = datetime.now().isoformat()
             keys[key]['use_count'] = keys[key].get('use_count', 0) + 1
+            keys[key]['last_used'] = datetime.now().isoformat()
             
-            return self.save_keys(keys)
+            self._save_keys(keys)
+            return True
             
         except Exception as e:
-            logger.error(f"Error actualizando uso: {e}")
+            logger.error(f"Error usando saldo: {e}")
             return False
     
-    def get_key_info(self, key: str) -> Optional[Dict]:
-        """Obtiene información de una clave"""
-        keys = self.load_keys()
-        
-        if key not in keys:
-            return None
-        
-        key_data = keys[key].copy()
-        key_data['remaining'] = key_data['max_amount'] - key_data.get('used_amount', 0)
-        
-        return key_data
-    
-    def get_remaining_balance(self, key: str) -> int:
-        """Obtiene saldo restante"""
-        key_info = self.get_key_info(key)
-        if key_info:
-            return key_info['remaining']
-        return 0
-    
-    def deactivate_key(self, key: str, reason: str = "") -> bool:
-        """Desactiva una clave"""
-        try:
-            keys = self.load_keys()
-            if key in keys:
-                keys[key]['active'] = False
-                keys[key]['deactivated_at'] = datetime.now().isoformat()
-                keys[key]['deactivation_reason'] = reason
-                return self.save_keys(keys)
-            return False
-        except Exception as e:
-            logger.error(f"Error desactivando clave: {e}")
-            return False
-    
-    def activate_key(self, key: str) -> bool:
-        """Activa una clave"""
-        try:
-            keys = self.load_keys()
-            if key in keys:
-                keys[key]['active'] = True
-                keys[key]['reactivated_at'] = datetime.now().isoformat()
-                return self.save_keys(keys)
-            return False
-        except Exception as e:
-            logger.error(f"Error activando clave: {e}")
-            return False
-    
-    def modify_key(self, key: str, **kwargs) -> bool:
+    def modify_key(self, key: str, admin_note: str = None, note_preset: str = None, **kwargs) -> bool:
         """
-        Modifica una clave
+        Modifica una clave existente
         
         Args:
             key: Clave a modificar
-            **kwargs: Campos a modificar (max_amount, valid_days, etc.)
+            admin_note: Nota del admin
+            note_preset: Preset de nota (CARGA_SALDO, CORRECCION_SALDO, etc.)
+            **kwargs: Campos a modificar:
+                - max_amount: Nuevo monto máximo
+                - used_amount: Nuevo monto usado
+                - valid_days: Días adicionales de validez
+                - expires: Nueva fecha de expiración (ISO format)
+                - telegram_id: Nuevo Telegram ID
+                - telegram_username: Nombre de usuario de Telegram
+                - active: Estado activo
+                - description: Nueva descripción
+                - role: Nuevo rol (USER, RESELLER)
         """
         try:
-            keys = self.load_keys()
+            keys = self._load_keys()
             
             if key not in keys:
                 return False
             
+            old_values = keys[key].copy()
+            changes = {}
+            
+            # Aplicar cambios
             if 'max_amount' in kwargs:
+                changes['max_amount'] = {
+                    'old': keys[key]['max_amount'],
+                    'new': kwargs['max_amount']
+                }
                 keys[key]['max_amount'] = kwargs['max_amount']
             
             if 'used_amount' in kwargs:
+                changes['used_amount'] = {
+                    'old': keys[key].get('used_amount', 0),
+                    'new': kwargs['used_amount']
+                }
                 keys[key]['used_amount'] = kwargs['used_amount']
             
             if 'valid_days' in kwargs:
-                keys[key]['expires'] = (datetime.now() + timedelta(days=kwargs['valid_days'])).isoformat()
+                old_expires = keys[key]['expires']
+                new_expires = (datetime.now() + timedelta(days=kwargs['valid_days'])).isoformat()
+                changes['expires'] = {
+                    'old': old_expires,
+                    'new': new_expires,
+                    'days_added': kwargs['valid_days']
+                }
+                keys[key]['expires'] = new_expires
+            
+            if 'expires' in kwargs:
+                changes['expires'] = {
+                    'old': keys[key]['expires'],
+                    'new': kwargs['expires']
+                }
+                keys[key]['expires'] = kwargs['expires']
+            
+            if 'telegram_id' in kwargs:
+                old_tid = keys[key].get('telegram_id')
+                new_tid = kwargs['telegram_id']
+                
+                # Verificar que el nuevo telegram_id no tenga otra clave
+                if new_tid:
+                    existing = self.get_key_by_telegram_id(new_tid)
+                    if existing and existing != key:
+                        logger.warning(f"Telegram ID {new_tid} ya tiene otra clave")
+                        return False
+                
+                changes['telegram_id'] = {
+                    'old': old_tid,
+                    'new': new_tid
+                }
+                keys[key]['telegram_id'] = new_tid
+            
+            if 'telegram_username' in kwargs:
+                changes['telegram_username'] = {
+                    'old': keys[key].get('telegram_username'),
+                    'new': kwargs['telegram_username']
+                }
+                keys[key]['telegram_username'] = kwargs['telegram_username']
+            
+            if 'active' in kwargs:
+                changes['active'] = {
+                    'old': keys[key].get('active', True),
+                    'new': kwargs['active']
+                }
+                keys[key]['active'] = kwargs['active']
             
             if 'description' in kwargs:
+                changes['description'] = {
+                    'old': keys[key].get('description', ''),
+                    'new': kwargs['description']
+                }
                 keys[key]['description'] = kwargs['description']
             
-            keys[key]['modified_at'] = datetime.now().isoformat()
+            if 'role' in kwargs:
+                changes['role'] = {
+                    'old': keys[key].get('role', 'USER'),
+                    'new': kwargs['role']
+                }
+                keys[key]['role'] = kwargs['role']
             
-            return self.save_keys(keys)
+            self._save_keys(keys)
+            
+            # Registrar modificación
+            if changes:
+                self._add_modification(
+                    key, 
+                    "MODIFICATION", 
+                    changes, 
+                    admin_note=admin_note,
+                    note_preset=note_preset
+                )
+            
+            logger.info(f"Clave modificada: {key[:8]}... - Cambios: {list(changes.keys())}")
+            return True
             
         except Exception as e:
             logger.error(f"Error modificando clave: {e}")
             return False
     
+    def deactivate_key(self, key: str, reason: str = None) -> bool:
+        """Desactiva una clave"""
+        return self.modify_key(
+            key, 
+            active=False, 
+            admin_note=reason,
+            note_preset="AJUSTE_ADMIN"
+        )
+    
+    def unlink_telegram(self, key: str, admin_note: str = None) -> bool:
+        """Desvincula el Telegram ID de una clave"""
+        return self.modify_key(
+            key,
+            telegram_id=None,
+            telegram_username=None,
+            admin_note=admin_note,
+            note_preset="DESVINCULACION"
+        )
+    
+    def link_telegram(self, key: str, telegram_id: int, 
+                     telegram_username: str = None, admin_note: str = None) -> bool:
+        """Vincula un Telegram ID a una clave"""
+        return self.modify_key(
+            key,
+            telegram_id=telegram_id,
+            telegram_username=telegram_username,
+            admin_note=admin_note,
+            note_preset="VINCULACION"
+        )
+    
+    def add_balance(self, key: str, amount: int, admin_note: str = None) -> bool:
+        """Agrega saldo a una clave"""
+        info = self.get_key_info(key)
+        if not info:
+            return False
+        
+        new_max = info['max_amount'] + amount
+        return self.modify_key(
+            key,
+            max_amount=new_max,
+            admin_note=admin_note,
+            note_preset="CARGA_SALDO"
+        )
+    
+    def get_modifications(self, key: str, limit: int = 20) -> List[Dict]:
+        """Obtiene historial de modificaciones de una clave"""
+        mods = self._load_modifications()
+        return mods.get(key, [])[:limit]
+    
+    def get_user_visible_modifications(self, key: str, limit: int = 10) -> List[Dict]:
+        """Obtiene modificaciones visibles para el usuario"""
+        mods = self.get_modifications(key, limit * 2)
+        visible = [m for m in mods if m.get('visible_to_user', True)]
+        return visible[:limit]
+    
     def get_all_keys(self, include_inactive: bool = False) -> List[Dict]:
         """Obtiene todas las claves"""
-        keys = self.load_keys()
+        keys = self._load_keys()
         result = []
         
-        for key, data in keys.items():
-            if not include_inactive and not data.get('active', True):
+        for key, info in keys.items():
+            if not include_inactive and not info.get('active', True):
                 continue
             
-            info = data.copy()
-            info['key'] = key
-            info['remaining'] = data['max_amount'] - data.get('used_amount', 0)
-            
-            # Verificar expiración
-            try:
-                expires = datetime.fromisoformat(data['expires'])
-                info['expired'] = datetime.now() > expires
-            except:
-                info['expired'] = True
-            
-            result.append(info)
+            result.append({
+                'key': key,
+                'key_masked': key[:8] + "...",
+                **info,
+                'remaining': info['max_amount'] - info.get('used_amount', 0)
+            })
+        
+        return result
+    
+    def get_keys_by_telegram_ids(self, telegram_ids: List[int]) -> List[Dict]:
+        """Obtiene claves de múltiples Telegram IDs (para revendedores)"""
+        keys = self._load_keys()
+        result = []
+        
+        for key, info in keys.items():
+            if info.get('telegram_id') in telegram_ids:
+                if info.get('active', True):
+                    result.append({
+                        'key_masked': key[:8] + "...",
+                        'telegram_id': info.get('telegram_id'),
+                        'telegram_username': info.get('telegram_username'),
+                        'remaining': info['max_amount'] - info.get('used_amount', 0),
+                        'used_amount': info.get('used_amount', 0),
+                        'expires': info['expires'],
+                        'last_used': info.get('last_used')
+                    })
         
         return result
     
     def get_stats(self) -> Dict:
         """Obtiene estadísticas de claves"""
-        keys = self.load_keys()
+        keys = self._load_keys()
         
         total = len(keys)
-        active = 0
-        expired = 0
-        total_balance = 0
-        used_balance = 0
+        active = sum(1 for k in keys.values() if k.get('active', True))
+        expired = sum(1 for k in keys.values() 
+                     if datetime.fromisoformat(k['expires']) < datetime.now())
+        total_balance = sum(k['max_amount'] for k in keys.values() if k.get('active', True))
+        total_used = sum(k.get('used_amount', 0) for k in keys.values())
         
-        for key, data in keys.items():
-            if data.get('active', True):
-                try:
-                    expires = datetime.fromisoformat(data['expires'])
-                    if datetime.now() <= expires:
-                        active += 1
-                    else:
-                        expired += 1
-                except:
-                    expired += 1
-            
-            total_balance += data.get('max_amount', 0)
-            used_balance += data.get('used_amount', 0)
+        by_role = {}
+        for k in keys.values():
+            role = k.get('role', 'USER')
+            by_role[role] = by_role.get(role, 0) + 1
         
         return {
-            'total_keys': total,
-            'active_keys': active,
-            'expired_keys': expired,
+            'total': total,
+            'active': active,
+            'inactive': total - active,
+            'expired': expired,
             'total_balance': total_balance,
-            'used_balance': used_balance,
-            'available_balance': total_balance - used_balance
+            'total_used': total_used,
+            'by_role': by_role
         }
+    
+    # ==========================================
+    # GESTIÓN DE REVENDEDORES
+    # ==========================================
+    
+    def create_reseller(self, telegram_id: int, name: str, 
+                       assigned_users: List[int] = None) -> bool:
+        """
+        Crea un nuevo revendedor
+        
+        Args:
+            telegram_id: ID de Telegram del revendedor
+            name: Nombre del revendedor
+            assigned_users: Lista de Telegram IDs que puede ver
+        """
+        try:
+            resellers = self._load_resellers()
+            
+            resellers[str(telegram_id)] = {
+                "name": name,
+                "telegram_id": telegram_id,
+                "created": datetime.now().isoformat(),
+                "active": True,
+                "assigned_users": assigned_users or [],
+                "stats": {
+                    "total_views": 0,
+                    "last_active": None
+                }
+            }
+            
+            self._save_resellers(resellers)
+            
+            # Si tiene una clave, actualizarla con rol RESELLER
+            key = self.get_key_by_telegram_id(telegram_id)
+            if key:
+                self.modify_key(key, role="RESELLER")
+            
+            logger.info(f"Revendedor creado: {name} (TG: {telegram_id})")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Error creando revendedor: {e}")
+            return False
+    
+    def get_reseller(self, telegram_id: int) -> Optional[Dict]:
+        """Obtiene información de un revendedor"""
+        resellers = self._load_resellers()
+        return resellers.get(str(telegram_id))
+    
+    def is_reseller(self, telegram_id: int) -> bool:
+        """Verifica si un usuario es revendedor"""
+        reseller = self.get_reseller(telegram_id)
+        return reseller is not None and reseller.get('active', True)
+    
+    def get_reseller_users(self, reseller_telegram_id: int) -> List[Dict]:
+        """
+        Obtiene los usuarios asignados a un revendedor
+        Solo devuelve info limitada: saldo, validez, username
+        """
+        reseller = self.get_reseller(reseller_telegram_id)
+        
+        if not reseller:
+            return []
+        
+        assigned = reseller.get('assigned_users', [])
+        
+        if not assigned:
+            return []
+        
+        # Actualizar estadísticas del revendedor
+        resellers = self._load_resellers()
+        resellers[str(reseller_telegram_id)]['stats']['total_views'] += 1
+        resellers[str(reseller_telegram_id)]['stats']['last_active'] = datetime.now().isoformat()
+        self._save_resellers(resellers)
+        
+        return self.get_keys_by_telegram_ids(assigned)
+    
+    def assign_user_to_reseller(self, reseller_telegram_id: int, 
+                                user_telegram_id: int) -> bool:
+        """Asigna un usuario a un revendedor"""
+        try:
+            resellers = self._load_resellers()
+            
+            key = str(reseller_telegram_id)
+            if key not in resellers:
+                return False
+            
+            if user_telegram_id not in resellers[key]['assigned_users']:
+                resellers[key]['assigned_users'].append(user_telegram_id)
+                self._save_resellers(resellers)
+            
+            return True
+            
+        except Exception as e:
+            logger.error(f"Error asignando usuario a revendedor: {e}")
+            return False
+    
+    def remove_user_from_reseller(self, reseller_telegram_id: int,
+                                  user_telegram_id: int) -> bool:
+        """Remueve un usuario de un revendedor"""
+        try:
+            resellers = self._load_resellers()
+            
+            key = str(reseller_telegram_id)
+            if key not in resellers:
+                return False
+            
+            if user_telegram_id in resellers[key]['assigned_users']:
+                resellers[key]['assigned_users'].remove(user_telegram_id)
+                self._save_resellers(resellers)
+            
+            return True
+            
+        except Exception as e:
+            logger.error(f"Error removiendo usuario de revendedor: {e}")
+            return False
+    
+    def get_all_resellers(self) -> List[Dict]:
+        """Obtiene todos los revendedores"""
+        resellers = self._load_resellers()
+        return [
+            {"telegram_id": int(k), **v}
+            for k, v in resellers.items()
+        ]
+    
+    def update_reseller(self, telegram_id: int, **kwargs) -> bool:
+        """Actualiza datos de un revendedor"""
+        try:
+            resellers = self._load_resellers()
+            key = str(telegram_id)
+            
+            if key not in resellers:
+                return False
+            
+            for field, value in kwargs.items():
+                if field in resellers[key]:
+                    resellers[key][field] = value
+            
+            self._save_resellers(resellers)
+            return True
+            
+        except Exception as e:
+            logger.error(f"Error actualizando revendedor: {e}")
+            return False
+    
+    def delete_reseller(self, telegram_id: int) -> bool:
+        """Elimina (desactiva) un revendedor"""
+        return self.update_reseller(telegram_id, active=False)
