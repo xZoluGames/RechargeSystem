@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Usuario - Recargas Tigo</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #667eea;
+            --secondary: #764ba2;
+        }
+        body { background: #f5f7fa; font-family: 'Segoe UI', system-ui, sans-serif; }
+        .navbar { background: linear-gradient(135deg, var(--primary), var(--secondary)); }
+        .balance-card {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border-radius: 15px;
+            padding: 25px;
+        }
+        .balance-card h1 { font-size: 2.5rem; font-weight: 700; }
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .package-item {
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .package-item:hover { border-color: var(--primary); background: #f8f9ff; }
+        .package-item.selected { border-color: var(--primary); background: #e7eaff; }
+        .nav-pills .nav-link.active { background: var(--primary); }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border: none;
+        }
+        .loading { display: none; }
+        .loading.show { display: block; }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-dark">
+        <div class="container-fluid">
+            <span class="navbar-brand"><i class="fas fa-mobile-alt me-2"></i>Recargas Tigo</span>
+            <div class="d-flex align-items-center">
+                <span class="text-white me-3" id="userInfo"></span>
+                <button class="btn btn-outline-light btn-sm" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <!-- Balance -->
+        <div class="balance-card mb-4">
+            <small style="opacity: 0.9;">Saldo Disponible</small>
+            <h1 id="balance">Gs. 0</h1>
+            <small id="keyInfo" style="opacity: 0.8;"></small>
+        </div>
+
+        <!-- API Key Input -->
+        <div class="card mb-4" id="keyInputCard">
+            <div class="card-body">
+                <h5><i class="fas fa-key me-2"></i>Tu Clave de API</h5>
+                <div class="input-group">
+                    <input type="text" class="form-control" id="apiKey" placeholder="Ingresa tu clave de API">
+                    <button class="btn btn-primary" onclick="loadBalance()">Cargar</button>
+                </div>
+                <small class="text-muted">Ingresa la clave que te proporcionó el administrador</small>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <ul class="nav nav-pills mb-4" role="tablist">
+            <li class="nav-item">
+                <a class="nav-link active" data-bs-toggle="tab" href="#recharge">
+                    <i class="fas fa-mobile-alt me-1"></i>Recargar
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" data-bs-toggle="tab" href="#history">
+                    <i class="fas fa-history me-1"></i>Historial
+                </a>
+            </li>
+        </ul>
+
+        <div class="tab-content">
+            <!-- Tab Recargar -->
+            <div class="tab-pane fade show active" id="recharge">
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h5><i class="fas fa-phone me-2"></i>Número de Destino</h5>
+                        <div class="input-group">
+                            <input type="tel" class="form-control" id="destination" 
+                                   placeholder="0981234567" maxlength="10">
+                            <button class="btn btn-primary" onclick="loadPackages()">
+                                <i class="fas fa-search me-1"></i>Buscar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Paquetes -->
+                <div class="card" id="packagesCard" style="display:none;">
+                    <div class="card-body">
+                        <h5><i class="fas fa-box me-2"></i>Selecciona un Paquete</h5>
+                        
+                        <div class="loading text-center py-4" id="packagesLoading">
+                            <div class="spinner-border text-primary"></div>
+                            <p class="mt-2">Cargando paquetes...</p>
+                        </div>
+
+                        <div id="packagesList"></div>
+                        <div id="packagesError" class="alert alert-danger" style="display:none;"></div>
+                    </div>
+                </div>
+
+                <!-- Confirmar -->
+                <div class="card mt-4" id="confirmCard" style="display:none;">
+                    <div class="card-body">
+                        <h5><i class="fas fa-check-circle me-2"></i>Confirmar Recarga</h5>
+                        <div id="confirmDetails" class="alert alert-info"></div>
+                        <button class="btn btn-success btn-lg w-100" onclick="doRecharge()" id="rechargeBtn">
+                            <i class="fas fa-check me-2"></i>Confirmar Recarga
+                        </button>
+                        <div id="rechargeResult" class="mt-3"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab Historial -->
+            <div class="tab-pane fade" id="history">
+                <div class="card">
+                    <div class="card-body">
+                        <h5><i class="fas fa-history me-2"></i>Historial de Recargas</h5>
+                        <div id="historyList"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Éxito -->
+    <div class="modal fade" id="successModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-body text-center p-5">
+                    <i class="fas fa-check-circle text-success" style="font-size: 80px;"></i>
+                    <h3 class="mt-3">¡Recarga Exitosa!</h3>
+                    <div id="successDetails"></div>
+                    <button class="btn btn-primary mt-3" data-bs-dismiss="modal">Entendido</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const token = localStorage.getItem('token');
+        const telegramId = localStorage.getItem('telegramId');
+        
+        if (!token) window.location.href = '/';
+
+        let apiKey = localStorage.getItem('apiKey') || '';
+        let packages = [];
+        let selectedPackage = null;
+        let currentBalance = 0;
+
+        // Headers para API
+        const headers = {
+            'Authorization': 'Bearer ' + token,
+            'Content-Type': 'application/json'
+        };
+
+        // Inicializar
+        document.getElementById('userInfo').textContent = 'ID: ' + telegramId;
+        if (apiKey) {
+            document.getElementById('apiKey').value = apiKey;
+            loadBalance();
+        }
+
+        async function loadBalance() {
+            apiKey = document.getElementById('apiKey').value.trim();
+            if (!apiKey) {
+                alert('Ingresa tu clave de API');
+                return;
+            }
+
+            localStorage.setItem('apiKey', apiKey);
+
+            try {
+                const resp = await fetch('/api/balance?api_key=' + encodeURIComponent(apiKey), { headers });
+                const data = await resp.json();
+
+                if (data.success && data.balance) {
+                    currentBalance = data.balance.remaining;
+                    document.getElementById('balance').textContent = 'Gs. ' + currentBalance.toLocaleString();
+                    document.getElementById('keyInfo').textContent = 
+                        `Clave válida hasta: ${new Date(data.balance.expires_at).toLocaleDateString()}`;
+                    loadHistory();
+                } else {
+                    document.getElementById('balance').textContent = 'Clave inválida';
+                    document.getElementById('keyInfo').textContent = data.error || '';
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        async function loadPackages() {
+            const dest = document.getElementById('destination').value.trim();
+            if (!/^\d{10}$/.test(dest)) {
+                alert('Número inválido. Debe tener 10 dígitos');
+                return;
+            }
+
+            document.getElementById('packagesCard').style.display = 'block';
+            document.getElementById('packagesLoading').classList.add('show');
+            document.getElementById('packagesList').innerHTML = '';
+            document.getElementById('packagesError').style.display = 'none';
+            document.getElementById('confirmCard').style.display = 'none';
+
+            try {
+                const resp = await fetch('/api/packages', {
+                    method: 'POST',
+                    headers,
+                    body: JSON.stringify({ destination: dest, api_key: apiKey })
+                });
+                const data = await resp.json();
+
+                if (data.success) {
+                    packages = data.packages || [];
+                    renderPackages(packages);
+                } else {
+                    document.getElementById('packagesError').textContent = data.error || 'Error';
+                    document.getElementById('packagesError').style.display = 'block';
+                }
+            } catch (e) {
+                document.getElementById('packagesError').textContent = 'Error de conexión';
+                document.getElementById('packagesError').style.display = 'block';
+            } finally {
+                document.getElementById('packagesLoading').classList.remove('show');
+            }
+        }
+
+        function renderPackages(pkgs) {
+            const container = document.getElementById('packagesList');
+            container.innerHTML = '';
+
+            if (pkgs.length === 0) {
+                container.innerHTML = '<p class="text-muted">No hay paquetes disponibles</p>';
+                return;
+            }
+
+            pkgs.forEach((pkg, i) => {
+                const affordable = pkg.amount <= currentBalance;
+                const div = document.createElement('div');
+                div.className = 'package-item' + (affordable ? '' : ' opacity-50');
+                div.innerHTML = `
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>${pkg.name}</strong>
+                            ${pkg.description ? '<br><small class="text-muted">' + pkg.description + '</small>' : ''}
+                        </div>
+                        <div class="text-end">
+                            <strong class="text-primary">Gs. ${pkg.amount.toLocaleString()}</strong>
+                            ${!affordable ? '<br><small class="text-danger">Saldo insuficiente</small>' : ''}
+                        </div>
+                    </div>
+                `;
+                if (affordable) {
+                    div.onclick = () => selectPackage(i);
+                }
+                container.appendChild(div);
+            });
+        }
+
+        function selectPackage(index) {
+            selectedPackage = packages[index];
+            
+            document.querySelectorAll('.package-item').forEach((el, i) => {
+                el.classList.toggle('selected', i === index);
+            });
+
+            const dest = document.getElementById('destination').value;
+            document.getElementById('confirmDetails').innerHTML = `
+                <p><strong>Número:</strong> ${dest}</p>
+                <p><strong>Paquete:</strong> ${selectedPackage.name}</p>
+                <p><strong>Monto:</strong> Gs. ${selectedPackage.amount.toLocaleString()}</p>
+                <p class="mb-0"><strong>Saldo restante:</strong> Gs. ${(currentBalance - selectedPackage.amount).toLocaleString()}</p>
+            `;
+            document.getElementById('confirmCard').style.display = 'block';
+            document.getElementById('rechargeResult').innerHTML = '';
+        }
+
+        async function doRecharge() {
+            if (!selectedPackage) return;
+
+            const btn = document.getElementById('rechargeBtn');
+            const result = document.getElementById('rechargeResult');
+            
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Procesando...';
+            result.innerHTML = '';
+
+            try {
+                const resp = await fetch('/api/recharge', {
+                    method: 'POST',
+                    headers,
+                    body: JSON.stringify({
+                        api_key: apiKey,
+                        destination: document.getElementById('destination').value,
+                        package_id: selectedPackage.id
+                    })
+                });
+                const data = await resp.json();
+
+                if (data.success) {
+                    document.getElementById('successDetails').innerHTML = `
+                        <p>Destino: ${document.getElementById('destination').value}</p>
+                        <p>Paquete: ${selectedPackage.name}</p>
+                        <p>Monto: Gs. ${selectedPackage.amount.toLocaleString()}</p>
+                    `;
+                    new bootstrap.Modal(document.getElementById('successModal')).show();
+                    
+                    // Actualizar saldo
+                    currentBalance -= selectedPackage.amount;
+                    document.getElementById('balance').textContent = 'Gs. ' + currentBalance.toLocaleString();
+                    
+                    // Limpiar
+                    document.getElementById('confirmCard').style.display = 'none';
+                    document.getElementById('packagesCard').style.display = 'none';
+                    selectedPackage = null;
+                    
+                    loadHistory();
+                } else {
+                    result.innerHTML = `<div class="alert alert-danger">${data.error || 'Error'}</div>`;
+                }
+            } catch (e) {
+                result.innerHTML = '<div class="alert alert-danger">Error de conexión</div>';
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-check me-2"></i>Confirmar Recarga';
+            }
+        }
+
+        async function loadHistory() {
+            try {
+                const resp = await fetch('/api/history?api_key=' + encodeURIComponent(apiKey) + '&limit=20', { headers });
+                const data = await resp.json();
+
+                const container = document.getElementById('historyList');
+                
+                if (data.success && data.history && data.history.length > 0) {
+                    container.innerHTML = data.history.map(h => `
+                        <div class="border-bottom py-2">
+                            <div class="d-flex justify-content-between">
+                                <strong>${h.destination}</strong>
+                                <span class="${h.status === 'SUCCESS' ? 'text-success' : 'text-danger'}">
+                                    ${h.status === 'SUCCESS' ? '✓' : '✗'} Gs. ${(h.amount || 0).toLocaleString()}
+                                </span>
+                            </div>
+                            <small class="text-muted">${h.package_name || ''} - ${new Date(h.timestamp).toLocaleString()}</small>
+                        </div>
+                    `).join('');
+                } else {
+                    container.innerHTML = '<p class="text-muted">No hay historial</p>';
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        function logout() {
+            fetch('/api/auth/logout', { method: 'POST', headers });
+            localStorage.clear();
+            window.location.href = '/';
+        }
+
+        // Enter key
+        document.getElementById('destination').addEventListener('keypress', e => {
+            if (e.key === 'Enter') loadPackages();
+        });
+        document.getElementById('apiKey').addEventListener('keypress', e => {
+            if (e.key === 'Enter') loadBalance();
+        });
+    </script>
+</body>
+</html>

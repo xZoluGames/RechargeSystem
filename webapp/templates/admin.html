@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Admin - Recargas Tigo</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #667eea;
+            --secondary: #764ba2;
+        }
+        body { background: #f5f7fa; font-family: 'Segoe UI', system-ui, sans-serif; }
+        .navbar { background: linear-gradient(135deg, var(--primary), var(--secondary)); }
+        .stat-card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            transition: transform 0.2s;
+        }
+        .stat-card:hover { transform: translateY(-3px); }
+        .stat-card .icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border: none;
+        }
+        .status-badge {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .status-ready { background: #d4edda; color: #155724; }
+        .status-error { background: #f8d7da; color: #721c24; }
+        .status-partial { background: #fff3cd; color: #856404; }
+        .table th { border-top: none; }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-dark">
+        <div class="container-fluid">
+            <span class="navbar-brand">
+                <i class="fas fa-shield-alt me-2"></i>Panel Administrador
+            </span>
+            <div class="d-flex align-items-center">
+                <span class="text-white me-3">👑 Admin</span>
+                <button class="btn btn-outline-light btn-sm" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <!-- Estado del Sistema -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="mb-1"><i class="fas fa-server me-2"></i>Estado del Sistema</h5>
+                        <span id="systemStatus" class="status-badge status-ready">Cargando...</span>
+                        <span id="currentAccount" class="ms-2 text-muted"></span>
+                    </div>
+                    <div>
+                        <button class="btn btn-outline-primary btn-sm me-2" onclick="refreshAuth()">
+                            <i class="fas fa-sync me-1"></i>Refrescar Auth
+                        </button>
+                        <button class="btn btn-outline-secondary btn-sm" onclick="switchAccount()">
+                            <i class="fas fa-exchange-alt me-1"></i>Cambiar Cuenta
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="row mb-4">
+            <div class="col-md-3 mb-3">
+                <div class="card stat-card">
+                    <div class="card-body d-flex align-items-center">
+                        <div class="icon bg-primary text-white me-3">
+                            <i class="fas fa-key"></i>
+                        </div>
+                        <div>
+                            <small class="text-muted">Total Claves</small>
+                            <h4 class="mb-0" id="totalKeys">0</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card stat-card">
+                    <div class="card-body d-flex align-items-center">
+                        <div class="icon bg-success text-white me-3">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div>
+                            <small class="text-muted">Claves Activas</small>
+                            <h4 class="mb-0" id="activeKeys">0</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card stat-card">
+                    <div class="card-body d-flex align-items-center">
+                        <div class="icon bg-info text-white me-3">
+                            <i class="fas fa-wallet"></i>
+                        </div>
+                        <div>
+                            <small class="text-muted">Saldo Total</small>
+                            <h4 class="mb-0" id="totalBalance">0</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card stat-card">
+                    <div class="card-body d-flex align-items-center">
+                        <div class="icon bg-warning text-dark me-3">
+                            <i class="fas fa-receipt"></i>
+                        </div>
+                        <div>
+                            <small class="text-muted">Recargas Hoy</small>
+                            <h4 class="mb-0" id="todayRecharges">0</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <ul class="nav nav-pills mb-4" role="tablist">
+            <li class="nav-item">
+                <a class="nav-link active" data-bs-toggle="tab" href="#keys">
+                    <i class="fas fa-key me-1"></i>Claves
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" data-bs-toggle="tab" href="#history">
+                    <i class="fas fa-history me-1"></i>Historial
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" data-bs-toggle="tab" href="#create">
+                    <i class="fas fa-plus me-1"></i>Crear Clave
+                </a>
+            </li>
+        </ul>
+
+        <div class="tab-content">
+            <!-- Tab Claves -->
+            <div class="tab-pane fade show active" id="keys">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="mb-0"><i class="fas fa-key me-2"></i>Claves de API</h5>
+                            <button class="btn btn-sm btn-outline-primary" onclick="loadKeys()">
+                                <i class="fas fa-sync"></i>
+                            </button>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Clave</th>
+                                        <th>Saldo</th>
+                                        <th>Usado</th>
+                                        <th>Expira</th>
+                                        <th>Estado</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="keysList"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab Historial -->
+            <div class="tab-pane fade" id="history">
+                <div class="card">
+                    <div class="card-body">
+                        <h5><i class="fas fa-history me-2"></i>Historial de Recargas</h5>
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Fecha</th>
+                                        <th>Destino</th>
+                                        <th>Paquete</th>
+                                        <th>Monto</th>
+                                        <th>Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="historyList"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab Crear -->
+            <div class="tab-pane fade" id="create">
+                <div class="card">
+                    <div class="card-body">
+                        <h5><i class="fas fa-plus me-2"></i>Crear Nueva Clave</h5>
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Monto Máximo (Gs.)</label>
+                                <input type="number" class="form-control" id="newKeyAmount" 
+                                       placeholder="1000000" value="1000000">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Días de Validez</label>
+                                <input type="number" class="form-control" id="newKeyDays" 
+                                       placeholder="365" value="365">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Descripción (opcional)</label>
+                                <input type="text" class="form-control" id="newKeyDesc" 
+                                       placeholder="Cliente X">
+                            </div>
+                        </div>
+                        <button class="btn btn-primary" onclick="createKey()">
+                            <i class="fas fa-plus me-2"></i>Crear Clave
+                        </button>
+                        <div id="createResult" class="mt-3"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Clave Creada -->
+    <div class="modal fade" id="keyModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Clave Creada</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <i class="fas fa-check-circle text-success" style="font-size: 50px;"></i>
+                    <h4 class="mt-3">¡Clave generada!</h4>
+                    <div class="bg-light p-3 rounded mt-3">
+                        <code id="newKeyCode" style="font-size: 18px;"></code>
+                    </div>
+                    <button class="btn btn-outline-primary mt-3" onclick="copyKey()">
+                        <i class="fas fa-copy me-1"></i>Copiar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const token = localStorage.getItem('token');
+        const isAdmin = localStorage.getItem('isAdmin') === 'true';
+        
+        if (!token || !isAdmin) window.location.href = '/';
+
+        const headers = {
+            'Authorization': 'Bearer ' + token,
+            'Content-Type': 'application/json'
+        };
+
+        // Inicializar
+        loadHealth();
+        loadKeys();
+        loadHistory();
+
+        async function loadHealth() {
+            try {
+                const resp = await fetch('/api/admin/health', { headers });
+                const data = await resp.json();
+
+                if (data.success && data.system) {
+                    const sys = data.system;
+                    const status = document.getElementById('systemStatus');
+                    
+                    if (sys.system_state === 'READY') {
+                        status.className = 'status-badge status-ready';
+                        status.textContent = '✓ Sistema Listo';
+                    } else if (sys.system_state === 'PARTIAL') {
+                        status.className = 'status-badge status-partial';
+                        status.textContent = '⚠ Parcial';
+                    } else {
+                        status.className = 'status-badge status-error';
+                        status.textContent = '✗ Error';
+                    }
+
+                    document.getElementById('currentAccount').textContent = 
+                        `Cuenta: ${sys.current_account || 'N/A'}`;
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        async function loadKeys() {
+            try {
+                const resp = await fetch('/api/admin/keys', { headers });
+                const data = await resp.json();
+
+                if (data.success) {
+                    const keys = data.keys || [];
+                    
+                    // Stats
+                    document.getElementById('totalKeys').textContent = keys.length;
+                    document.getElementById('activeKeys').textContent = 
+                        keys.filter(k => k.active).length;
+                    
+                    const totalBal = keys.reduce((sum, k) => sum + (k.remaining || 0), 0);
+                    document.getElementById('totalBalance').textContent = 
+                        'Gs. ' + totalBal.toLocaleString();
+
+                    // Tabla
+                    const tbody = document.getElementById('keysList');
+                    tbody.innerHTML = keys.map(k => `
+                        <tr>
+                            <td><code>${k.key}</code></td>
+                            <td>Gs. ${(k.remaining || 0).toLocaleString()}</td>
+                            <td>Gs. ${(k.used_amount || 0).toLocaleString()}</td>
+                            <td>${new Date(k.expires_at).toLocaleDateString()}</td>
+                            <td>
+                                <span class="badge ${k.active ? 'bg-success' : 'bg-danger'}">
+                                    ${k.active ? 'Activa' : 'Inactiva'}
+                                </span>
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-danger" onclick="deleteKey('${k.key}')">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `).join('');
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        async function loadHistory() {
+            try {
+                const resp = await fetch('/api/admin/history?limit=50', { headers });
+                const data = await resp.json();
+
+                if (data.success && data.history) {
+                    const today = new Date().toDateString();
+                    const todayCount = data.history.filter(h => 
+                        new Date(h.timestamp).toDateString() === today
+                    ).length;
+                    document.getElementById('todayRecharges').textContent = todayCount;
+
+                    const tbody = document.getElementById('historyList');
+                    tbody.innerHTML = data.history.slice(0, 50).map(h => `
+                        <tr>
+                            <td>${new Date(h.timestamp).toLocaleString()}</td>
+                            <td>${h.destination}</td>
+                            <td>${h.package_name || 'N/A'}</td>
+                            <td>Gs. ${(h.amount || 0).toLocaleString()}</td>
+                            <td>
+                                <span class="badge ${h.status === 'SUCCESS' ? 'bg-success' : 'bg-danger'}">
+                                    ${h.status}
+                                </span>
+                            </td>
+                        </tr>
+                    `).join('');
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        async function createKey() {
+            const amount = parseInt(document.getElementById('newKeyAmount').value);
+            const days = parseInt(document.getElementById('newKeyDays').value);
+            const desc = document.getElementById('newKeyDesc').value;
+            const result = document.getElementById('createResult');
+
+            if (!amount || amount <= 0) {
+                result.innerHTML = '<div class="alert alert-danger">Monto inválido</div>';
+                return;
+            }
+
+            try {
+                const resp = await fetch('/api/admin/keys', {
+                    method: 'POST',
+                    headers,
+                    body: JSON.stringify({
+                        max_amount: amount,
+                        valid_days: days,
+                        description: desc
+                    })
+                });
+                const data = await resp.json();
+
+                if (data.success) {
+                    document.getElementById('newKeyCode').textContent = data.key;
+                    new bootstrap.Modal(document.getElementById('keyModal')).show();
+                    loadKeys();
+                } else {
+                    result.innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
+                }
+            } catch (e) {
+                result.innerHTML = '<div class="alert alert-danger">Error de conexión</div>';
+            }
+        }
+
+        async function deleteKey(key) {
+            if (!confirm('¿Desactivar esta clave?')) return;
+
+            try {
+                await fetch('/api/admin/keys/' + key, { method: 'DELETE', headers });
+                loadKeys();
+            } catch (e) {
+                alert('Error');
+            }
+        }
+
+        async function refreshAuth() {
+            try {
+                const resp = await fetch('/api/admin/auth/refresh', { method: 'POST', headers });
+                const data = await resp.json();
+                alert(data.success ? 'Auth refrescado' : data.error);
+                loadHealth();
+            } catch (e) {
+                alert('Error');
+            }
+        }
+
+        async function switchAccount() {
+            try {
+                const resp = await fetch('/api/admin/auth/switch', { method: 'POST', headers });
+                const data = await resp.json();
+                alert(data.success ? 'Cuenta cambiada' : data.error);
+                loadHealth();
+            } catch (e) {
+                alert('Error');
+            }
+        }
+
+        function copyKey() {
+            const key = document.getElementById('newKeyCode').textContent;
+            navigator.clipboard.writeText(key);
+            alert('Clave copiada');
+        }
+
+        function logout() {
+            fetch('/api/auth/logout', { method: 'POST', headers });
+            localStorage.clear();
+            window.location.href = '/';
+        }
+    </script>
+</body>
+</html>

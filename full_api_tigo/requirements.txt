@@ -1,0 +1,16 @@
+# Dependencias para API REST de Recargas Tigo
+# Instalar con: pip install -r requirements.txt --break-system-packages
+
+# Framework Web
+Flask==2.3.3
+flask-cors==4.0.0
+
+# HTTP Requests
+requests==2.31.0
+urllib3==2.0.4
+
+# Utilidades
+python-dateutil==2.8.2
+
+# Producción (opcional)
+gunicorn==21.2.0

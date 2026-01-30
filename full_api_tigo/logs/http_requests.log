@@ -1,0 +1,292 @@
+2026-01-30 16:09:03,739 - INFO - ============================================================
+2026-01-30 16:09:03,740 - INFO - REQUEST: POST https://auth.api.py-tigomoney.io/access/task
+2026-01-30 16:09:03,740 - INFO - Headers: {
+  "User-Agent": "Dart/3.7 (dart:io)",
+  "Accept": "*/*",
+  "Accept-Encoding": "gzip",
+  "Content-Type": "application/json",
+  "x-api-key": "dxtyCQG4pUk0FZvpEi8DFwmOEUs4qX0cL4wYL9SCAL5vTgYv",
+  "x-namespace-app": "com.juvo.tigomoney",
+  "x-build-app": "82000060",
+  "x-version-app": "8.2.0"
+}
+2026-01-30 16:09:03,741 - INFO - Body: {
+  "username": "0985308247",
+  "fingerprint": "be71761898e0d4ee",
+  "model": "iPhone 2026 Pro Max"
+}
+2026-01-30 16:09:05,455 - INFO - RESPONSE: 200
+2026-01-30 16:09:05,456 - INFO - Body: {"uuid":"7e88bba817cc4c5887debbe37e52cfac","otp":true}
+2026-01-30 16:09:05,456 - INFO - ============================================================
+2026-01-30 16:09:05,456 - INFO - ============================================================
+2026-01-30 16:09:05,457 - INFO - REQUEST: POST https://auth.api.py-tigomoney.io/otp
+2026-01-30 16:09:05,457 - INFO - Headers: {
+  "User-Agent": "Dart/3.7 (dart:io)",
+  "Accept": "*/*",
+  "Accept-Encoding": "gzip",
+  "Content-Type": "application/json",
+  "x-api-key": "dxtyCQG4pUk0FZvpEi8DFwmOEUs4qX0cL4wYL9SCAL5vTgYv",
+  "x-namespace-app": "com.juvo.tigomoney",
+  "x-build-app": "82000060",
+  "x-version-app": "8.2.0"
+}
+2026-01-30 16:09:05,457 - INFO - Body: {
+  "uuid": "7e88bba817cc4c5887debbe37e52cfac",
+  "code": "Fj7V0f6zKsg"
+}
+2026-01-30 16:09:05,860 - INFO - RESPONSE: 200
+2026-01-30 16:09:05,860 - INFO - Body: {"message":"OTP Generated"}
+2026-01-30 16:09:05,861 - INFO - ============================================================
+2026-01-30 16:09:09,863 - INFO - ============================================================
+2026-01-30 16:09:09,863 - INFO - REQUEST: PUT https://auth.api.py-tigomoney.io/otp
+2026-01-30 16:09:09,863 - INFO - Headers: {
+  "User-Agent": "Dart/3.7 (dart:io)",
+  "Accept": "*/*",
+  "Accept-Encoding": "gzip",
+  "Content-Type": "application/json",
+  "x-api-key": "dxtyCQG4pUk0FZvpEi8DFwmOEUs4qX0cL4wYL9SCAL5vTgYv",
+  "x-namespace-app": "com.juvo.tigomoney",
+  "x-build-app": "82000060",
+  "x-version-app": "8.2.0"
+}
+2026-01-30 16:09:09,863 - INFO - Body: {
+  "uuid": "7e88bba817cc4c5887debbe37e52cfac",
+  "otp": "284691"
+}
+2026-01-30 16:09:10,430 - INFO - RESPONSE: 200
+2026-01-30 16:09:10,431 - INFO - Body: {"message":"OTP Validated"}
+2026-01-30 16:09:10,431 - INFO - ============================================================
+2026-01-30 16:09:10,432 - INFO - ============================================================
+2026-01-30 16:09:10,433 - INFO - REQUEST: GET https://auth.api.py-tigomoney.io/auth/validate/7e88bba817cc4c5887debbe37e52cfac
+2026-01-30 16:09:10,433 - INFO - Headers: {
+  "User-Agent": "Dart/3.7 (dart:io)",
+  "Accept": "*/*",
+  "Accept-Encoding": "gzip",
+  "Content-Type": "application/json",
+  "x-api-key": "dxtyCQG4pUk0FZvpEi8DFwmOEUs4qX0cL4wYL9SCAL5vTgYv",
+  "x-namespace-app": "com.juvo.tigomoney",
+  "x-build-app": "82000060",
+  "x-version-app": "8.2.0"
+}
+2026-01-30 16:09:11,963 - INFO - RESPONSE: 200
+2026-01-30 16:09:11,963 - INFO - Body: {"next":"LOGIN","kyc_verified":false,"error_manager":null,"account_info":{"lei":null,"name":{"title":"","firstName":"JOSE LUIS","middleName":null,"lastName":"CABALLERO GAVILAN","fullName":"JOSE LUIS CABALLERO GAVILAN","nativeName":""},"subStatus":"ACTIVA","subStatusId":100,"status":"AVAILABLE"}}
+2026-01-30 16:09:11,964 - INFO - ============================================================
+2026-01-30 16:09:11,964 - INFO - ============================================================
+2026-01-30 16:09:11,964 - INFO - REQUEST: POST https://auth.api.py-tigomoney.io/auth/login
+2026-01-30 16:09:11,964 - INFO - Headers: {
+  "User-Agent": "Dart/3.7 (dart:io)",
+  "Accept": "*/*",
+  "Accept-Encoding": "gzip",
+  "Content-Type": "application/json",
+  "x-api-key": "dxtyCQG4pUk0FZvpEi8DFwmOEUs4qX0cL4wYL9SCAL5vTgYv",
+  "x-namespace-app": "com.juvo.tigomoney",
+  "x-build-app": "82000060",
+  "x-version-app": "8.2.0"
+}
+2026-01-30 16:09:11,965 - INFO - Body: {
+  "uuid": "7e88bba817cc4c5887debbe37e52cfac",
+  "password": "0612"
+}
+2026-01-30 16:09:13,372 - INFO - RESPONSE: 200
+2026-01-30 16:09:13,372 - INFO - Body: {"token_aws":"eyJhbGciOiJIUzM4NCJ9.eyJtdHNUb2tlbiI6ImV5Sk1RVk5VWDBGRFEwVlRVeUk2SWpJd01qWXRNREV0TXpBZ01USTZOVGc2TlRjaUxDSlNSVk5GVkNJNklqQWlMQ0pCVlZSSVJVNVVTVU5CVkVsUFRsOVVXVkJGWDFKUFRFVlRJam9pTW53MGZEaDhPU0lzSW5SdmEyVnVYM1I1Y0dVaU9pSmlaV0Z5WlhJaUxDSk1SVlpGVEY5SlJDSTZJalV3TURBaUxDSk5WVk5VWDBGRFEwVlFWRjlNUVZOVVgxUkZVazFUWDBGT1JGOURUMDVFU1ZSSlQwNVRJam9pTUNJc0ltRmpZMlZ6YzE5MGIydGxiaUk2SWpBeE16QmhZVGt5TURkbVpqTTBOamMyTVdNMU9XVmhaV1k0T0RNM09UUmxJaXdpY21WbWNtVnphRjkwYjJ0bGJpSTZJak0wTmpBNE56TTVPRE5qWWpCa04ySmhZbVU0TURCak1XWm1ZV1JpTjJKaUlpd2lRMHhKUlU1VVgxSlBURVVpT2lJeUlpd2lVMVJCVkZWVElqb2lNQ0lzSWtOTVNVVk9WRjlKUkNJNklqVXdPRGM0TVNJc0luSmxabkpsYzJoZlpYaHdhWEpsYzE5cGJpSTZJak0yTURBd0lpd2ljMk52Y0dVaU9pSjNjbWwwWlNJc0lrUkZWa2xEUlY5TFJWa2lPaUl3T1RnMU16QTRNalEzSWl3aVJFVldTVU5GWDFSWlVFVmZTVVFpT2lKTlQwSkpURVVpTENKbGVIQnBjbVZ6WDJsdUlqbzJNREF3TENKRVJWWkpRMFZmU1VRaU9pSXpPRGcxTWpBeklpd2lkWE5sY201aGJXVWlPaUl3T1RnMU16QTRNalEzSW4wPSIsInN1YiI6IjA5ODUzMDgyNDciLCJpYXQiOjE3Njk3ODkzNTMsImV4cCI6MTc2OTc4OTk1MywiYXV0aF90a
+2026-01-30 16:09:13,373 - INFO - ============================================================
+2026-01-30 16:09:13,377 - INFO - ============================================================
+2026-01-30 16:09:13,378 - INFO - REQUEST: POST https://auth.api.py-tigomoney.io/access/task
+2026-01-30 16:09:13,378 - INFO - Headers: {
+  "User-Agent": "Dart/3.7 (dart:io)",
+  "Accept": "*/*",
+  "Accept-Encoding": "gzip",
+  "Content-Type": "application/json",
+  "x-api-key": "dxtyCQG4pUk0FZvpEi8DFwmOEUs4qX0cL4wYL9SCAL5vTgYv",
+  "x-namespace-app": "com.juvo.tigomoney",
+  "x-build-app": "82000060",
+  "x-version-app": "8.2.0"
+}
+2026-01-30 16:09:13,378 - INFO - Body: {
+  "username": "0985139979",
+  "fingerprint": "93f6d8434eece48d",
+  "model": "Samsung Galaxy S26"
+}
+2026-01-30 16:09:14,863 - INFO - RESPONSE: 200
+2026-01-30 16:09:14,864 - INFO - Body: {"otp":true,"uuid":"6d841742bf7a41f6a2aba8236226db3c"}
+2026-01-30 16:09:14,864 - INFO - ============================================================
+2026-01-30 16:09:14,865 - INFO - ============================================================
+2026-01-30 16:09:14,865 - INFO - REQUEST: POST https://auth.api.py-tigomoney.io/otp
+2026-01-30 16:09:14,865 - INFO - Headers: {
+  "User-Agent": "Dart/3.7 (dart:io)",
+  "Accept": "*/*",
+  "Accept-Encoding": "gzip",
+  "Content-Type": "application/json",
+  "x-api-key": "dxtyCQG4pUk0FZvpEi8DFwmOEUs4qX0cL4wYL9SCAL5vTgYv",
+  "x-namespace-app": "com.juvo.tigomoney",
+  "x-build-app": "82000060",
+  "x-version-app": "8.2.0"
+}
+2026-01-30 16:09:14,865 - INFO - Body: {
+  "uuid": "6d841742bf7a41f6a2aba8236226db3c",
+  "code": "Fj7V0f6zKsg"
+}
+2026-01-30 16:09:15,278 - INFO - RESPONSE: 200
+2026-01-30 16:09:15,279 - INFO - Body: {"message":"OTP Generated"}
+2026-01-30 16:09:15,279 - INFO - ============================================================
+2026-01-30 16:09:19,281 - INFO - ============================================================
+2026-01-30 16:09:19,281 - INFO - REQUEST: PUT https://auth.api.py-tigomoney.io/otp
+2026-01-30 16:09:19,282 - INFO - Headers: {
+  "User-Agent": "Dart/3.7 (dart:io)",
+  "Accept": "*/*",
+  "Accept-Encoding": "gzip",
+  "Content-Type": "application/json",
+  "x-api-key": "dxtyCQG4pUk0FZvpEi8DFwmOEUs4qX0cL4wYL9SCAL5vTgYv",
+  "x-namespace-app": "com.juvo.tigomoney",
+  "x-build-app": "82000060",
+  "x-version-app": "8.2.0"
+}
+2026-01-30 16:09:19,282 - INFO - Body: {
+  "uuid": "6d841742bf7a41f6a2aba8236226db3c",
+  "otp": "917041"
+}
+2026-01-30 16:09:19,700 - INFO - RESPONSE: 200
+2026-01-30 16:09:19,701 - INFO - Body: {"message":"OTP Validated"}
+2026-01-30 16:09:19,701 - INFO - ============================================================
+2026-01-30 16:09:19,703 - INFO - ============================================================
+2026-01-30 16:09:19,704 - INFO - REQUEST: GET https://auth.api.py-tigomoney.io/auth/validate/6d841742bf7a41f6a2aba8236226db3c
+2026-01-30 16:09:19,704 - INFO - Headers: {
+  "User-Agent": "Dart/3.7 (dart:io)",
+  "Accept": "*/*",
+  "Accept-Encoding": "gzip",
+  "Content-Type": "application/json",
+  "x-api-key": "dxtyCQG4pUk0FZvpEi8DFwmOEUs4qX0cL4wYL9SCAL5vTgYv",
+  "x-namespace-app": "com.juvo.tigomoney",
+  "x-build-app": "82000060",
+  "x-version-app": "8.2.0"
+}
+2026-01-30 16:09:21,234 - INFO - RESPONSE: 200
+2026-01-30 16:09:21,234 - INFO - Body: {"next":"LOGIN","kyc_verified":false,"error_manager":null,"account_info":{"lei":null,"name":{"title":"","firstName":"IRIO ISMAEL","middleName":null,"lastName":"MONGES RODRIGUEZ","fullName":"IRIO ISMAEL MONGES RODRIGUEZ","nativeName":""},"subStatus":"BLOQUEO_FALTA_INFO","subStatusId":111,"status":"UNAVAILABLE"}}
+2026-01-30 16:09:21,234 - INFO - ============================================================
+2026-01-30 16:09:21,235 - INFO - ============================================================
+2026-01-30 16:09:21,235 - INFO - REQUEST: POST https://auth.api.py-tigomoney.io/auth/login
+2026-01-30 16:09:21,235 - INFO - Headers: {
+  "User-Agent": "Dart/3.7 (dart:io)",
+  "Accept": "*/*",
+  "Accept-Encoding": "gzip",
+  "Content-Type": "application/json",
+  "x-api-key": "dxtyCQG4pUk0FZvpEi8DFwmOEUs4qX0cL4wYL9SCAL5vTgYv",
+  "x-namespace-app": "com.juvo.tigomoney",
+  "x-build-app": "82000060",
+  "x-version-app": "8.2.0"
+}
+2026-01-30 16:09:21,235 - INFO - Body: {
+  "uuid": "6d841742bf7a41f6a2aba8236226db3c",
+  "password": "0612"
+}
+2026-01-30 16:09:21,878 - INFO - RESPONSE: 200
+2026-01-30 16:09:21,878 - INFO - Body: {"token_aws":"eyJhbGciOiJIUzM4NCJ9.eyJtdHNUb2tlbiI6ImV5Sk1RVk5VWDBGRFEwVlRVeUk2SWpJd01qWXRNREV0TWprZ01qRTZNVFU2TWpraUxDSlNSVk5GVkNJNklqQWlMQ0pCVlZSSVJVNVVTVU5CVkVsUFRsOVVXVkJGWDFKUFRFVlRJam9pTW53MGZEaDhPU0lzSW5SdmEyVnVYM1I1Y0dVaU9pSmlaV0Z5WlhJaUxDSk1SVlpGVEY5SlJDSTZJalV3TURBaUxDSk5WVk5VWDBGRFEwVlFWRjlNUVZOVVgxUkZVazFUWDBGT1JGOURUMDVFU1ZSSlQwNVRJam9pTUNJc0ltRmpZMlZ6YzE5MGIydGxiaUk2SWpjd1lqTmtNell3WWpNeU9UazRNRGM0TURkaU0yTTFNV0V3WmpnNU9UWmhJaXdpY21WbWNtVnphRjkwYjJ0bGJpSTZJbU5qTXpnelltRmlZVEl4Wm1VMU5XVTBZalEzT0dGaFltVTVOR1F4WmpjeElpd2lRMHhKUlU1VVgxSlBURVVpT2lJeUlpd2lVMVJCVkZWVElqb2lNQ0lzSWtOTVNVVk9WRjlKUkNJNklqSTVOalk0T0RNaUxDSnlaV1p5WlhOb1gyVjRjR2x5WlhOZmFXNGlPaUl6TmpBd01DSXNJbk5qYjNCbElqb2lkM0pwZEdVaUxDSkVSVlpKUTBWZlMwVlpJam9pTURrNE5URXpPVGszT1NJc0lrUkZWa2xEUlY5VVdWQkZYMGxFSWpvaVRVOUNTVXhGSWl3aVpYaHdhWEpsYzE5cGJpSTZOakF3TUN3aVJFVldTVU5GWDBsRUlqb2lNemswT0RBd09TSXNJblZ6WlhKdVlXMWxJam9pTURrNE5URXpPVGszT1NKOSIsInN1YiI6IjA5ODUxMzk5NzkiLCJpYXQiOjE3Njk3ODkzNjEsImV4cCI6MTc2OTc4OTk2MSwiYXV0aF90a
+2026-01-30 16:09:21,878 - INFO - ============================================================
+2026-01-30 16:32:58,650 - INFO - ============================================================
+2026-01-30 16:32:58,650 - INFO - REQUEST: POST https://auth.api.py-tigomoney.io/access/task
+2026-01-30 16:32:58,650 - INFO - Headers: {
+  "User-Agent": "Dart/3.7 (dart:io)",
+  "Accept": "*/*",
+  "Accept-Encoding": "gzip",
+  "Content-Type": "application/json",
+  "x-api-key": "dxtyCQG4pUk0FZvpEi8DFwmOEUs4qX0cL4wYL9SCAL5vTgYv",
+  "x-namespace-app": "com.juvo.tigomoney",
+  "x-build-app": "82000060",
+  "x-version-app": "8.2.0"
+}
+2026-01-30 16:32:58,650 - INFO - Body: {
+  "username": "0985308247",
+  "fingerprint": "be71761898e0d4ee",
+  "model": "iPhone 2026 Pro Max"
+}
+2026-01-30 16:33:00,471 - INFO - RESPONSE: 200
+2026-01-30 16:33:00,472 - INFO - Body: {"otp":false,"uuid":"51817708878743b1b90f020c5f76aae3"}
+2026-01-30 16:33:00,472 - INFO - ============================================================
+2026-01-30 16:33:00,472 - INFO - ============================================================
+2026-01-30 16:33:00,472 - INFO - REQUEST: GET https://auth.api.py-tigomoney.io/auth/validate/51817708878743b1b90f020c5f76aae3
+2026-01-30 16:33:00,473 - INFO - Headers: {
+  "User-Agent": "Dart/3.7 (dart:io)",
+  "Accept": "*/*",
+  "Accept-Encoding": "gzip",
+  "Content-Type": "application/json",
+  "x-api-key": "dxtyCQG4pUk0FZvpEi8DFwmOEUs4qX0cL4wYL9SCAL5vTgYv",
+  "x-namespace-app": "com.juvo.tigomoney",
+  "x-build-app": "82000060",
+  "x-version-app": "8.2.0"
+}
+2026-01-30 16:33:02,102 - INFO - RESPONSE: 200
+2026-01-30 16:33:02,102 - INFO - Body: {"next":"LOGIN","kyc_verified":false,"error_manager":null,"account_info":{"lei":null,"name":{"title":"","firstName":"JOSE LUIS","middleName":null,"lastName":"CABALLERO GAVILAN","fullName":"JOSE LUIS CABALLERO GAVILAN","nativeName":""},"subStatus":"ACTIVA","subStatusId":100,"status":"AVAILABLE"}}
+2026-01-30 16:33:02,102 - INFO - ============================================================
+2026-01-30 16:33:02,103 - INFO - ============================================================
+2026-01-30 16:33:02,103 - INFO - REQUEST: POST https://auth.api.py-tigomoney.io/auth/login
+2026-01-30 16:33:02,103 - INFO - Headers: {
+  "User-Agent": "Dart/3.7 (dart:io)",
+  "Accept": "*/*",
+  "Accept-Encoding": "gzip",
+  "Content-Type": "application/json",
+  "x-api-key": "dxtyCQG4pUk0FZvpEi8DFwmOEUs4qX0cL4wYL9SCAL5vTgYv",
+  "x-namespace-app": "com.juvo.tigomoney",
+  "x-build-app": "82000060",
+  "x-version-app": "8.2.0"
+}
+2026-01-30 16:33:02,104 - INFO - Body: {
+  "uuid": "51817708878743b1b90f020c5f76aae3",
+  "password": "0612"
+}
+2026-01-30 16:33:02,863 - INFO - RESPONSE: 200
+2026-01-30 16:33:02,863 - INFO - Body: {"token_aws":"eyJhbGciOiJIUzM4NCJ9.eyJtdHNUb2tlbiI6ImV5Sk1RVk5VWDBGRFEwVlRVeUk2SWpJd01qWXRNREV0TXpBZ01UTTZNRGs2TVRNaUxDSlNSVk5GVkNJNklqQWlMQ0pCVlZSSVJVNVVTVU5CVkVsUFRsOVVXVkJGWDFKUFRFVlRJam9pTW53MGZEaDhPU0lzSW5SdmEyVnVYM1I1Y0dVaU9pSmlaV0Z5WlhJaUxDSk1SVlpGVEY5SlJDSTZJalV3TURBaUxDSk5WVk5VWDBGRFEwVlFWRjlNUVZOVVgxUkZVazFUWDBGT1JGOURUMDVFU1ZSSlQwNVRJam9pTUNJc0ltRmpZMlZ6YzE5MGIydGxiaUk2SW1RMk5XVTVaVFJrT1dWbU16Wm1NakV3TVRRNU1qSmhNakkzWVRoaFpUazVJaXdpY21WbWNtVnphRjkwYjJ0bGJpSTZJalk1TW1WaFpUQXhZVGd3TkRsbU56TXlObVV5WTJGalpHSXpORFkyTjJReklpd2lRMHhKUlU1VVgxSlBURVVpT2lJeUlpd2lVMVJCVkZWVElqb2lNQ0lzSWtOTVNVVk9WRjlKUkNJNklqVXdPRGM0TVNJc0luSmxabkpsYzJoZlpYaHdhWEpsYzE5cGJpSTZJak0yTURBd0lpd2ljMk52Y0dVaU9pSjNjbWwwWlNJc0lrUkZWa2xEUlY5TFJWa2lPaUl3T1RnMU16QTRNalEzSWl3aVJFVldTVU5GWDFSWlVFVmZTVVFpT2lKTlQwSkpURVVpTENKbGVIQnBjbVZ6WDJsdUlqbzJNREF3TENKRVJWWkpRMFZmU1VRaU9pSXpPRGcxTWpBeklpd2lkWE5sY201aGJXVWlPaUl3T1RnMU16QTRNalEzSW4wPSIsInN1YiI6IjA5ODUzMDgyNDciLCJpYXQiOjE3Njk3OTA3ODIsImV4cCI6MTc2OTc5MTM4MiwiYXV0aF90a
+2026-01-30 16:33:02,864 - INFO - ============================================================
+2026-01-30 16:44:56,557 - INFO - ============================================================
+2026-01-30 16:44:56,558 - INFO - REQUEST: POST https://auth.api.py-tigomoney.io/access/task
+2026-01-30 16:44:56,558 - INFO - Headers: {
+  "User-Agent": "Dart/3.7 (dart:io)",
+  "Accept": "*/*",
+  "Accept-Encoding": "gzip",
+  "Content-Type": "application/json",
+  "x-api-key": "dxtyCQG4pUk0FZvpEi8DFwmOEUs4qX0cL4wYL9SCAL5vTgYv",
+  "x-namespace-app": "com.juvo.tigomoney",
+  "x-build-app": "82000060",
+  "x-version-app": "8.2.0"
+}
+2026-01-30 16:44:56,558 - INFO - Body: {
+  "username": "0985308247",
+  "fingerprint": "be71761898e0d4ee",
+  "model": "iPhone 2026 Pro Max"
+}
+2026-01-30 16:44:58,001 - INFO - RESPONSE: 200
+2026-01-30 16:44:58,002 - INFO - Body: {"otp":false,"uuid":"4c25bc55f39846e982cd4cf53882063f"}
+2026-01-30 16:44:58,002 - INFO - ============================================================
+2026-01-30 16:44:58,002 - INFO - ============================================================
+2026-01-30 16:44:58,003 - INFO - REQUEST: GET https://auth.api.py-tigomoney.io/auth/validate/4c25bc55f39846e982cd4cf53882063f
+2026-01-30 16:44:58,003 - INFO - Headers: {
+  "User-Agent": "Dart/3.7 (dart:io)",
+  "Accept": "*/*",
+  "Accept-Encoding": "gzip",
+  "Content-Type": "application/json",
+  "x-api-key": "dxtyCQG4pUk0FZvpEi8DFwmOEUs4qX0cL4wYL9SCAL5vTgYv",
+  "x-namespace-app": "com.juvo.tigomoney",
+  "x-build-app": "82000060",
+  "x-version-app": "8.2.0"
+}
+2026-01-30 16:44:59,529 - INFO - RESPONSE: 200
+2026-01-30 16:44:59,529 - INFO - Body: {"next":"LOGIN","kyc_verified":false,"error_manager":null,"account_info":{"lei":null,"name":{"title":"","firstName":"JOSE LUIS","middleName":null,"lastName":"CABALLERO GAVILAN","fullName":"JOSE LUIS CABALLERO GAVILAN","nativeName":""},"subStatus":"ACTIVA","subStatusId":100,"status":"AVAILABLE"}}
+2026-01-30 16:44:59,530 - INFO - ============================================================
+2026-01-30 16:44:59,530 - INFO - ============================================================
+2026-01-30 16:44:59,530 - INFO - REQUEST: POST https://auth.api.py-tigomoney.io/auth/login
+2026-01-30 16:44:59,531 - INFO - Headers: {
+  "User-Agent": "Dart/3.7 (dart:io)",
+  "Accept": "*/*",
+  "Accept-Encoding": "gzip",
+  "Content-Type": "application/json",
+  "x-api-key": "dxtyCQG4pUk0FZvpEi8DFwmOEUs4qX0cL4wYL9SCAL5vTgYv",
+  "x-namespace-app": "com.juvo.tigomoney",
+  "x-build-app": "82000060",
+  "x-version-app": "8.2.0"
+}
+2026-01-30 16:44:59,531 - INFO - Body: {
+  "uuid": "4c25bc55f39846e982cd4cf53882063f",
+  "password": "0612"
+}
+2026-01-30 16:45:00,286 - INFO - RESPONSE: 200
+2026-01-30 16:45:00,287 - INFO - Body: {"token_aws":"eyJhbGciOiJIUzM4NCJ9.eyJtdHNUb2tlbiI6ImV5Sk1RVk5VWDBGRFEwVlRVeUk2SWpJd01qWXRNREV0TXpBZ01UTTZNek02TURJaUxDSlNSVk5GVkNJNklqQWlMQ0pCVlZSSVJVNVVTVU5CVkVsUFRsOVVXVkJGWDFKUFRFVlRJam9pTW53MGZEaDhPU0lzSW5SdmEyVnVYM1I1Y0dVaU9pSmlaV0Z5WlhJaUxDSk1SVlpGVEY5SlJDSTZJalV3TURBaUxDSk5WVk5VWDBGRFEwVlFWRjlNUVZOVVgxUkZVazFUWDBGT1JGOURUMDVFU1ZSSlQwNVRJam9pTUNJc0ltRmpZMlZ6YzE5MGIydGxiaUk2SWpVNE5qbGlPR05sTVRjME56aGtNRFEwTlRObFpERXlOVFE1WVdWaFltUTBJaXdpY21WbWNtVnphRjkwYjJ0bGJpSTZJbVpsWTJNeVl6Y3paREJtTXpneU9UVmtORGd5TlRrNU9XRmtaR1U1WTJWbUlpd2lRMHhKUlU1VVgxSlBURVVpT2lJeUlpd2lVMVJCVkZWVElqb2lNQ0lzSWtOTVNVVk9WRjlKUkNJNklqVXdPRGM0TVNJc0luSmxabkpsYzJoZlpYaHdhWEpsYzE5cGJpSTZJak0yTURBd0lpd2ljMk52Y0dVaU9pSjNjbWwwWlNJc0lrUkZWa2xEUlY5TFJWa2lPaUl3T1RnMU16QTRNalEzSWl3aVJFVldTVU5GWDFSWlVFVmZTVVFpT2lKTlQwSkpURVVpTENKbGVIQnBjbVZ6WDJsdUlqbzJNREF3TENKRVJWWkpRMFZmU1VRaU9pSXpPRGcxTWpBeklpd2lkWE5sY201aGJXVWlPaUl3T1RnMU16QTRNalEzSW4wPSIsInN1YiI6IjA5ODUzMDgyNDciLCJpYXQiOjE3Njk3OTE0OTksImV4cCI6MTc2OTc5MjA5OSwiYXV0aF90a
+2026-01-30 16:45:00,287 - INFO - ============================================================

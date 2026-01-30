@@ -1,0 +1,93 @@
+2026-01-30 16:32:30,341 - INFO - ============================================================
+2026-01-30 16:32:30,342 - INFO - 🚀 Iniciando receptor SMS en puerto 5002
+2026-01-30 16:32:30,342 - INFO - 📂 Directorio base: /home/administrator/full_tigo_api
+2026-01-30 16:32:30,342 - INFO - 📝 Archivo OTP: /home/administrator/full_tigo_api/ultimo_otp.txt
+2026-01-30 16:32:30,342 - INFO - ============================================================
+ * Serving Flask app 'sms_receiver'
+ * Debug mode: off
+2026-01-30 16:32:30,367 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5002
+ * Running on http://155.117.45.228:5002
+2026-01-30 16:32:30,367 - INFO - [33mPress CTRL+C to quit[0m
+2026-01-30 16:34:01,933 - INFO - ============================================================
+2026-01-30 16:34:01,934 - INFO - 📱 SMS recibido de: 555
+2026-01-30 16:34:01,934 - INFO - 📟 SIM: SIM1
+2026-01-30 16:34:01,934 - INFO - 📄 Contenido: Descarga la APP Tigo Money y descubri los beneficios aca https://tmy.la/3nZjJF5 . Hiciste un pago de...
+2026-01-30 16:34:01,934 - INFO - ============================================================
+2026-01-30 16:34:01,936 - WARNING - ⚠️ No se pudo extraer OTP
+2026-01-30 16:34:01,937 - INFO - 181.124.133.22 - - [30/Jan/2026 16:34:01] "POST /otp HTTP/1.1" 200 -
+2026-01-30 16:34:04,510 - INFO - ============================================================
+2026-01-30 16:34:04,510 - INFO - 📱 SMS recibido de: 555
+2026-01-30 16:34:04,510 - INFO - 📟 SIM: SIM1
+2026-01-30 16:34:04,511 - INFO - 📄 Contenido: Se ha revertido la transaccion 868965529. Transaccion de reversion id: 868965536...
+2026-01-30 16:34:04,511 - INFO - ============================================================
+2026-01-30 16:34:04,511 - WARNING - ⚠️ No se pudo extraer OTP
+2026-01-30 16:34:04,511 - INFO - 181.124.133.22 - - [30/Jan/2026 16:34:04] "POST /otp HTTP/1.1" 200 -
+2026-01-30 16:34:05,920 - INFO - ============================================================
+2026-01-30 16:34:05,921 - INFO - 📱 SMS recibido de: 838002
+2026-01-30 16:34:05,921 - INFO - 📟 SIM: SIM1
+2026-01-30 16:34:05,921 - INFO - 📄 Contenido: Aprovecha esta promocion! Elegi una opcion 1 o 2 y compra con tu billetera Tigo Money: 
+1-200MBx3750...
+2026-01-30 16:34:05,921 - INFO - ============================================================
+2026-01-30 16:34:05,921 - WARNING - ⚠️ No se pudo extraer OTP
+2026-01-30 16:34:05,922 - INFO - 181.124.133.22 - - [30/Jan/2026 16:34:05] "POST /otp HTTP/1.1" 200 -
+2026-01-30 16:36:44,492 - INFO - ============================================================
+2026-01-30 16:36:44,493 - INFO - 📱 SMS recibido de: 555
+2026-01-30 16:36:44,493 - INFO - 📟 SIM: SIM1
+2026-01-30 16:36:44,493 - INFO - 📄 Contenido: Descarga la APP Tigo Money y descubri los beneficios aca https://tmy.la/3nZjJF5 . Hiciste un pago de...
+2026-01-30 16:36:44,493 - INFO - ============================================================
+2026-01-30 16:36:44,493 - WARNING - ⚠️ No se pudo extraer OTP
+2026-01-30 16:36:44,494 - INFO - 181.124.133.22 - - [30/Jan/2026 16:36:44] "POST /otp HTTP/1.1" 200 -
+2026-01-30 16:36:45,899 - INFO - ============================================================
+2026-01-30 16:36:45,900 - INFO - 📱 SMS recibido de: 10010
+2026-01-30 16:36:45,900 - INFO - 📟 SIM: SIM1
+2026-01-30 16:36:45,900 - INFO - 📄 Contenido: Se acredito el paquete de  7GB+ilimTDx55000Gsx30D exitosamente!. Comprar es mas facil en Mi Tigo htt...
+2026-01-30 16:36:45,900 - INFO - ============================================================
+2026-01-30 16:36:45,900 - WARNING - ⚠️ No se pudo extraer OTP
+2026-01-30 16:36:45,901 - INFO - 181.124.133.22 - - [30/Jan/2026 16:36:45] "POST /otp HTTP/1.1" 200 -
+2026-01-30 16:36:51,365 - INFO - ============================================================
+2026-01-30 16:36:51,365 - INFO - 📱 SMS recibido de: 838001
+2026-01-30 16:36:51,365 - INFO - 📟 SIM: SIM1
+2026-01-30 16:36:51,366 - INFO - 📄 Contenido: Tigo premia tus recargas! Aprovecha este premio exclusivo para vos. Tenes 6hs para canjearlo. Respon...
+2026-01-30 16:36:51,366 - INFO - ============================================================
+2026-01-30 16:36:51,366 - WARNING - ⚠️ No se pudo extraer OTP
+2026-01-30 16:36:51,366 - INFO - 181.124.133.22 - - [30/Jan/2026 16:36:51] "POST /otp HTTP/1.1" 200 -
+2026-01-30 16:55:17,490 - INFO - ============================================================
+2026-01-30 16:55:17,490 - INFO - 📱 SMS recibido de: 838007
+2026-01-30 16:55:17,491 - INFO - 📟 SIM: SIM2
+2026-01-30 16:55:17,491 - INFO - 📄 Contenido: Aprovecha tu prestamo disponible para disfrutar de tu Paquetigo! Responde con  1  para PRESTAR: 
+1-1...
+2026-01-30 16:55:17,491 - INFO - ============================================================
+2026-01-30 16:55:17,491 - WARNING - ⚠️ No se pudo extraer OTP
+2026-01-30 16:55:17,492 - INFO - 181.124.133.238 - - [30/Jan/2026 16:55:17] "POST /otp HTTP/1.1" 200 -
+2026-01-30 17:07:03,202 - INFO - ============================================================
+2026-01-30 17:07:03,203 - INFO - 📱 SMS recibido de: 555
+2026-01-30 17:07:03,203 - INFO - 📟 SIM: SIM1
+2026-01-30 17:07:03,203 - INFO - 📄 Contenido: 609021 es el codigo de verificacion para acceder a tu billetera Tigo Money. NO compartas este codigo...
+2026-01-30 17:07:03,204 - INFO - ============================================================
+2026-01-30 17:07:03,204 - INFO - ✅ OTP EXTRAÍDO: 609021
+2026-01-30 17:07:03,205 - INFO - 💾 OTP guardado en: /home/administrator/full_tigo_api/ultimo_otp.txt
+2026-01-30 17:07:03,206 - INFO - 181.124.132.30 - - [30/Jan/2026 17:07:03] "POST /otp HTTP/1.1" 200 -
+2026-01-30 17:07:08,485 - INFO - ============================================================
+2026-01-30 17:07:08,486 - INFO - 📱 SMS recibido de: 555
+2026-01-30 17:07:08,486 - INFO - 📟 SIM: SIM1
+2026-01-30 17:07:08,486 - INFO - 📄 Contenido: Se esta registrando un nuevo dispositivo IPHONE en tu cuenta TigoMoney...
+2026-01-30 17:07:08,487 - INFO - ============================================================
+2026-01-30 17:07:08,487 - WARNING - ⚠️ No se pudo extraer OTP
+2026-01-30 17:07:08,489 - INFO - 181.124.132.30 - - [30/Jan/2026 17:07:08] "POST /otp HTTP/1.1" 200 -
+2026-01-30 17:19:39,679 - INFO - ============================================================
+2026-01-30 17:19:39,680 - INFO - 📱 SMS recibido de: 555
+2026-01-30 17:19:39,681 - INFO - 📟 SIM: SIM1
+2026-01-30 17:19:39,681 - INFO - 📄 Contenido: 300970 es el codigo de verificacion para acceder a tu billetera Tigo Money. NO compartas este codigo...
+2026-01-30 17:19:39,681 - INFO - ============================================================
+2026-01-30 17:19:39,681 - INFO - ✅ OTP EXTRAÍDO: 300970
+2026-01-30 17:19:39,682 - INFO - 💾 OTP guardado en: /home/administrator/full_tigo_api/ultimo_otp.txt
+2026-01-30 17:19:39,684 - INFO - 181.124.132.232 - - [30/Jan/2026 17:19:39] "POST /otp HTTP/1.1" 200 -
+2026-01-30 17:19:45,435 - INFO - ============================================================
+2026-01-30 17:19:45,436 - INFO - 📱 SMS recibido de: 555
+2026-01-30 17:19:45,436 - INFO - 📟 SIM: SIM1
+2026-01-30 17:19:45,436 - INFO - 📄 Contenido: Se esta registrando un nuevo dispositivo IPHONE en tu cuenta TigoMoney...
+2026-01-30 17:19:45,436 - INFO - ============================================================
+2026-01-30 17:19:45,436 - WARNING - ⚠️ No se pudo extraer OTP
+2026-01-30 17:19:45,436 - INFO - 181.124.132.232 - - [30/Jan/2026 17:19:45] "POST /otp HTTP/1.1" 200 -

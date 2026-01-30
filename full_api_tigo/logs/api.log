@@ -1,0 +1,575 @@
+2026-01-30 16:09:03,736 - __main__ - INFO - ============================================================
+2026-01-30 16:09:03,736 - __main__ - INFO - INICIANDO API REST DE RECARGAS TIGO v2.1
+2026-01-30 16:09:03,736 - __main__ - INFO - Puerto: 5000
+2026-01-30 16:09:03,736 - __main__ - INFO - Cuentas configuradas: ['0985308247', '0985139979']
+2026-01-30 16:09:03,737 - __main__ - INFO - ============================================================
+2026-01-30 16:09:03,737 - __main__ - INFO - Ejecutando inicialización dual de cuentas...
+2026-01-30 16:09:03,737 - __main__ - INFO - ============================================================
+2026-01-30 16:09:03,737 - __main__ - INFO - INICIALIZANDO SISTEMA DE AUTENTICACIÓN
+2026-01-30 16:09:03,737 - __main__ - INFO - Método: Nuevo
+2026-01-30 16:09:03,737 - __main__ - INFO - Cuenta: Por defecto
+2026-01-30 16:09:03,737 - __main__ - INFO - ============================================================
+2026-01-30 16:09:03,737 - tigo_auth_new - INFO - ============================================================
+2026-01-30 16:09:03,737 - tigo_auth_new - INFO - 🚀 INICIALIZACIÓN DUAL DE CUENTAS
+2026-01-30 16:09:03,738 - tigo_auth_new - INFO - ============================================================
+2026-01-30 16:09:03,738 - tigo_auth_new - INFO - 
+📱 Intentando cuenta: 0985308247
+2026-01-30 16:09:03,738 - tigo_auth_new - INFO - ============================================================
+2026-01-30 16:09:03,738 - tigo_auth_new - INFO - 🚀 INICIANDO AUTENTICACIÓN - 0985308247
+2026-01-30 16:09:03,738 - tigo_auth_new - INFO - ============================================================
+2026-01-30 16:09:03,738 - tigo_auth_new - INFO - 🔑 Nuevo fingerprint generado: be71761898e0d4ee
+2026-01-30 16:09:03,739 - tigo_auth_new - INFO - 📤 Paso 1: Access Task para 0985308247
+2026-01-30 16:09:03,739 - http_requests - INFO - ============================================================
+2026-01-30 16:09:03,740 - http_requests - INFO - REQUEST: POST https://auth.api.py-tigomoney.io/access/task
+2026-01-30 16:09:03,740 - http_requests - INFO - Headers: {
+  "User-Agent": "Dart/3.7 (dart:io)",
+  "Accept": "*/*",
+  "Accept-Encoding": "gzip",
+  "Content-Type": "application/json",
+  "x-api-key": "dxtyCQG4pUk0FZvpEi8DFwmOEUs4qX0cL4wYL9SCAL5vTgYv",
+  "x-namespace-app": "com.juvo.tigomoney",
+  "x-build-app": "82000060",
+  "x-version-app": "8.2.0"
+}
+2026-01-30 16:09:03,741 - http_requests - INFO - Body: {
+  "username": "0985308247",
+  "fingerprint": "be71761898e0d4ee",
+  "model": "iPhone 2026 Pro Max"
+}
+2026-01-30 16:09:05,455 - http_requests - INFO - RESPONSE: 200
+2026-01-30 16:09:05,456 - http_requests - INFO - Body: {"uuid":"7e88bba817cc4c5887debbe37e52cfac","otp":true}
+2026-01-30 16:09:05,456 - http_requests - INFO - ============================================================
+2026-01-30 16:09:05,456 - tigo_auth_new - INFO - ✅ Access Task exitoso - UUID: 7e88bba817cc4c5887debbe37e52cfac, OTP requerido: True
+2026-01-30 16:09:05,456 - tigo_auth_new - INFO - 🔐 Fingerprint requiere validación con OTP
+2026-01-30 16:09:05,456 - tigo_auth_new - INFO - 📤 Paso 2: Solicitando OTP para UUID 7e88bba817cc4c5887debbe37e52cfac
+2026-01-30 16:09:05,456 - http_requests - INFO - ============================================================
+2026-01-30 16:09:05,457 - http_requests - INFO - REQUEST: POST https://auth.api.py-tigomoney.io/otp
+2026-01-30 16:09:05,457 - http_requests - INFO - Headers: {
+  "User-Agent": "Dart/3.7 (dart:io)",
+  "Accept": "*/*",
+  "Accept-Encoding": "gzip",
+  "Content-Type": "application/json",
+  "x-api-key": "dxtyCQG4pUk0FZvpEi8DFwmOEUs4qX0cL4wYL9SCAL5vTgYv",
+  "x-namespace-app": "com.juvo.tigomoney",
+  "x-build-app": "82000060",
+  "x-version-app": "8.2.0"
+}
+2026-01-30 16:09:05,457 - http_requests - INFO - Body: {
+  "uuid": "7e88bba817cc4c5887debbe37e52cfac",
+  "code": "Fj7V0f6zKsg"
+}
+2026-01-30 16:09:05,860 - http_requests - INFO - RESPONSE: 200
+2026-01-30 16:09:05,860 - http_requests - INFO - Body: {"message":"OTP Generated"}
+2026-01-30 16:09:05,861 - http_requests - INFO - ============================================================
+2026-01-30 16:09:05,861 - tigo_auth_new - INFO - ✅ OTP solicitado correctamente - Esperando SMS
+2026-01-30 16:09:05,861 - tigo_auth_new - INFO - ⏳ Esperando OTP por SMS (máx 180s)...
+2026-01-30 16:09:09,862 - tigo_auth_new - INFO - 📱 OTP recibido: 284691 (edad: 1s)
+2026-01-30 16:09:09,863 - tigo_auth_new - INFO - 📤 Paso 4: Validando OTP 284691
+2026-01-30 16:09:09,863 - http_requests - INFO - ============================================================
+2026-01-30 16:09:09,863 - http_requests - INFO - REQUEST: PUT https://auth.api.py-tigomoney.io/otp
+2026-01-30 16:09:09,863 - http_requests - INFO - Headers: {
+  "User-Agent": "Dart/3.7 (dart:io)",
+  "Accept": "*/*",
+  "Accept-Encoding": "gzip",
+  "Content-Type": "application/json",
+  "x-api-key": "dxtyCQG4pUk0FZvpEi8DFwmOEUs4qX0cL4wYL9SCAL5vTgYv",
+  "x-namespace-app": "com.juvo.tigomoney",
+  "x-build-app": "82000060",
+  "x-version-app": "8.2.0"
+}
+2026-01-30 16:09:09,863 - http_requests - INFO - Body: {
+  "uuid": "7e88bba817cc4c5887debbe37e52cfac",
+  "otp": "284691"
+}
+2026-01-30 16:09:10,430 - http_requests - INFO - RESPONSE: 200
+2026-01-30 16:09:10,431 - http_requests - INFO - Body: {"message":"OTP Validated"}
+2026-01-30 16:09:10,431 - http_requests - INFO - ============================================================
+2026-01-30 16:09:10,431 - tigo_auth_new - INFO - ✅ OTP validado correctamente
+2026-01-30 16:09:10,432 - tigo_auth_new - INFO - 💾 Fingerprint guardado para 0985308247
+2026-01-30 16:09:10,432 - tigo_auth_new - INFO - 📤 Paso 5: Validando UUID 7e88bba817cc4c5887debbe37e52cfac
+2026-01-30 16:09:10,432 - http_requests - INFO - ============================================================
+2026-01-30 16:09:10,433 - http_requests - INFO - REQUEST: GET https://auth.api.py-tigomoney.io/auth/validate/7e88bba817cc4c5887debbe37e52cfac
+2026-01-30 16:09:10,433 - http_requests - INFO - Headers: {
+  "User-Agent": "Dart/3.7 (dart:io)",
+  "Accept": "*/*",
+  "Accept-Encoding": "gzip",
+  "Content-Type": "application/json",
+  "x-api-key": "dxtyCQG4pUk0FZvpEi8DFwmOEUs4qX0cL4wYL9SCAL5vTgYv",
+  "x-namespace-app": "com.juvo.tigomoney",
+  "x-build-app": "82000060",
+  "x-version-app": "8.2.0"
+}
+2026-01-30 16:09:11,963 - http_requests - INFO - RESPONSE: 200
+2026-01-30 16:09:11,963 - http_requests - INFO - Body: {"next":"LOGIN","kyc_verified":false,"error_manager":null,"account_info":{"lei":null,"name":{"title":"","firstName":"JOSE LUIS","middleName":null,"lastName":"CABALLERO GAVILAN","fullName":"JOSE LUIS CABALLERO GAVILAN","nativeName":""},"subStatus":"ACTIVA","subStatusId":100,"status":"AVAILABLE"}}
+2026-01-30 16:09:11,964 - http_requests - INFO - ============================================================
+2026-01-30 16:09:11,964 - tigo_auth_new - INFO - ✅ UUID validado - Cuenta: JOSE LUIS CABALLERO GAVILAN
+2026-01-30 16:09:11,964 - tigo_auth_new - INFO - 📤 Paso 6: Login final con UUID 7e88bba817cc4c5887debbe37e52cfac
+2026-01-30 16:09:11,964 - http_requests - INFO - ============================================================
+2026-01-30 16:09:11,964 - http_requests - INFO - REQUEST: POST https://auth.api.py-tigomoney.io/auth/login
+2026-01-30 16:09:11,964 - http_requests - INFO - Headers: {
+  "User-Agent": "Dart/3.7 (dart:io)",
+  "Accept": "*/*",
+  "Accept-Encoding": "gzip",
+  "Content-Type": "application/json",
+  "x-api-key": "dxtyCQG4pUk0FZvpEi8DFwmOEUs4qX0cL4wYL9SCAL5vTgYv",
+  "x-namespace-app": "com.juvo.tigomoney",
+  "x-build-app": "82000060",
+  "x-version-app": "8.2.0"
+}
+2026-01-30 16:09:11,965 - http_requests - INFO - Body: {
+  "uuid": "7e88bba817cc4c5887debbe37e52cfac",
+  "password": "0612"
+}
+2026-01-30 16:09:13,372 - http_requests - INFO - RESPONSE: 200
+2026-01-30 16:09:13,372 - http_requests - INFO - Body: {"token_aws":"eyJhbGciOiJIUzM4NCJ9.eyJtdHNUb2tlbiI6ImV5Sk1RVk5VWDBGRFEwVlRVeUk2SWpJd01qWXRNREV0TXpBZ01USTZOVGc2TlRjaUxDSlNSVk5GVkNJNklqQWlMQ0pCVlZSSVJVNVVTVU5CVkVsUFRsOVVXVkJGWDFKUFRFVlRJam9pTW53MGZEaDhPU0lzSW5SdmEyVnVYM1I1Y0dVaU9pSmlaV0Z5WlhJaUxDSk1SVlpGVEY5SlJDSTZJalV3TURBaUxDSk5WVk5VWDBGRFEwVlFWRjlNUVZOVVgxUkZVazFUWDBGT1JGOURUMDVFU1ZSSlQwNVRJam9pTUNJc0ltRmpZMlZ6YzE5MGIydGxiaUk2SWpBeE16QmhZVGt5TURkbVpqTTBOamMyTVdNMU9XVmhaV1k0T0RNM09UUmxJaXdpY21WbWNtVnphRjkwYjJ0bGJpSTZJak0wTmpBNE56TTVPRE5qWWpCa04ySmhZbVU0TURCak1XWm1ZV1JpTjJKaUlpd2lRMHhKUlU1VVgxSlBURVVpT2lJeUlpd2lVMVJCVkZWVElqb2lNQ0lzSWtOTVNVVk9WRjlKUkNJNklqVXdPRGM0TVNJc0luSmxabkpsYzJoZlpYaHdhWEpsYzE5cGJpSTZJak0yTURBd0lpd2ljMk52Y0dVaU9pSjNjbWwwWlNJc0lrUkZWa2xEUlY5TFJWa2lPaUl3T1RnMU16QTRNalEzSWl3aVJFVldTVU5GWDFSWlVFVmZTVVFpT2lKTlQwSkpURVVpTENKbGVIQnBjbVZ6WDJsdUlqbzJNREF3TENKRVJWWkpRMFZmU1VRaU9pSXpPRGcxTWpBeklpd2lkWE5sY201aGJXVWlPaUl3T1RnMU16QTRNalEzSW4wPSIsInN1YiI6IjA5ODUzMDgyNDciLCJpYXQiOjE3Njk3ODkzNTMsImV4cCI6MTc2OTc4OTk1MywiYXV0aF90a
+2026-01-30 16:09:13,373 - http_requests - INFO - ============================================================
+2026-01-30 16:09:13,374 - tigo_auth_new - INFO - 💾 Tokens guardados para 0985308247
+2026-01-30 16:09:13,374 - tigo_auth_new - INFO - ============================================================
+2026-01-30 16:09:13,375 - tigo_auth_new - INFO - ✅ LOGIN EXITOSO
+2026-01-30 16:09:13,375 - tigo_auth_new - INFO -    Usuario: 0985308247
+2026-01-30 16:09:13,375 - tigo_auth_new - INFO -    Nombre: JOSE LUIS CABALLERO GAVILAN
+2026-01-30 16:09:13,375 - tigo_auth_new - INFO -    Token expira en: 6000s
+2026-01-30 16:09:13,375 - tigo_auth_new - INFO - ============================================================
+2026-01-30 16:09:13,376 - tigo_auth_new - INFO - ✅ Cuenta 0985308247 inicializada correctamente
+2026-01-30 16:09:13,376 - tigo_auth_new - INFO - 
+📱 Intentando cuenta: 0985139979
+2026-01-30 16:09:13,376 - tigo_auth_new - INFO - ============================================================
+2026-01-30 16:09:13,376 - tigo_auth_new - INFO - 🚀 INICIANDO AUTENTICACIÓN - 0985139979
+2026-01-30 16:09:13,376 - tigo_auth_new - INFO - ============================================================
+2026-01-30 16:09:13,377 - tigo_auth_new - INFO - 🔑 Nuevo fingerprint generado: 93f6d8434eece48d
+2026-01-30 16:09:13,377 - tigo_auth_new - INFO - 📤 Paso 1: Access Task para 0985139979
+2026-01-30 16:09:13,377 - http_requests - INFO - ============================================================
+2026-01-30 16:09:13,378 - http_requests - INFO - REQUEST: POST https://auth.api.py-tigomoney.io/access/task
+2026-01-30 16:09:13,378 - http_requests - INFO - Headers: {
+  "User-Agent": "Dart/3.7 (dart:io)",
+  "Accept": "*/*",
+  "Accept-Encoding": "gzip",
+  "Content-Type": "application/json",
+  "x-api-key": "dxtyCQG4pUk0FZvpEi8DFwmOEUs4qX0cL4wYL9SCAL5vTgYv",
+  "x-namespace-app": "com.juvo.tigomoney",
+  "x-build-app": "82000060",
+  "x-version-app": "8.2.0"
+}
+2026-01-30 16:09:13,378 - http_requests - INFO - Body: {
+  "username": "0985139979",
+  "fingerprint": "93f6d8434eece48d",
+  "model": "Samsung Galaxy S26"
+}
+2026-01-30 16:09:14,863 - http_requests - INFO - RESPONSE: 200
+2026-01-30 16:09:14,864 - http_requests - INFO - Body: {"otp":true,"uuid":"6d841742bf7a41f6a2aba8236226db3c"}
+2026-01-30 16:09:14,864 - http_requests - INFO - ============================================================
+2026-01-30 16:09:14,864 - tigo_auth_new - INFO - ✅ Access Task exitoso - UUID: 6d841742bf7a41f6a2aba8236226db3c, OTP requerido: True
+2026-01-30 16:09:14,864 - tigo_auth_new - INFO - 🔐 Fingerprint requiere validación con OTP
+2026-01-30 16:09:14,864 - tigo_auth_new - INFO - 📤 Paso 2: Solicitando OTP para UUID 6d841742bf7a41f6a2aba8236226db3c
+2026-01-30 16:09:14,865 - http_requests - INFO - ============================================================
+2026-01-30 16:09:14,865 - http_requests - INFO - REQUEST: POST https://auth.api.py-tigomoney.io/otp
+2026-01-30 16:09:14,865 - http_requests - INFO - Headers: {
+  "User-Agent": "Dart/3.7 (dart:io)",
+  "Accept": "*/*",
+  "Accept-Encoding": "gzip",
+  "Content-Type": "application/json",
+  "x-api-key": "dxtyCQG4pUk0FZvpEi8DFwmOEUs4qX0cL4wYL9SCAL5vTgYv",
+  "x-namespace-app": "com.juvo.tigomoney",
+  "x-build-app": "82000060",
+  "x-version-app": "8.2.0"
+}
+2026-01-30 16:09:14,865 - http_requests - INFO - Body: {
+  "uuid": "6d841742bf7a41f6a2aba8236226db3c",
+  "code": "Fj7V0f6zKsg"
+}
+2026-01-30 16:09:15,278 - http_requests - INFO - RESPONSE: 200
+2026-01-30 16:09:15,279 - http_requests - INFO - Body: {"message":"OTP Generated"}
+2026-01-30 16:09:15,279 - http_requests - INFO - ============================================================
+2026-01-30 16:09:15,279 - tigo_auth_new - INFO - ✅ OTP solicitado correctamente - Esperando SMS
+2026-01-30 16:09:15,279 - tigo_auth_new - INFO - ⏳ Esperando OTP por SMS (máx 180s)...
+2026-01-30 16:09:19,280 - tigo_auth_new - INFO - 📱 OTP recibido: 917041 (edad: 1s)
+2026-01-30 16:09:19,281 - tigo_auth_new - INFO - 📤 Paso 4: Validando OTP 917041
+2026-01-30 16:09:19,281 - http_requests - INFO - ============================================================
+2026-01-30 16:09:19,281 - http_requests - INFO - REQUEST: PUT https://auth.api.py-tigomoney.io/otp
+2026-01-30 16:09:19,282 - http_requests - INFO - Headers: {
+  "User-Agent": "Dart/3.7 (dart:io)",
+  "Accept": "*/*",
+  "Accept-Encoding": "gzip",
+  "Content-Type": "application/json",
+  "x-api-key": "dxtyCQG4pUk0FZvpEi8DFwmOEUs4qX0cL4wYL9SCAL5vTgYv",
+  "x-namespace-app": "com.juvo.tigomoney",
+  "x-build-app": "82000060",
+  "x-version-app": "8.2.0"
+}
+2026-01-30 16:09:19,282 - http_requests - INFO - Body: {
+  "uuid": "6d841742bf7a41f6a2aba8236226db3c",
+  "otp": "917041"
+}
+2026-01-30 16:09:19,700 - http_requests - INFO - RESPONSE: 200
+2026-01-30 16:09:19,701 - http_requests - INFO - Body: {"message":"OTP Validated"}
+2026-01-30 16:09:19,701 - http_requests - INFO - ============================================================
+2026-01-30 16:09:19,702 - tigo_auth_new - INFO - ✅ OTP validado correctamente
+2026-01-30 16:09:19,703 - tigo_auth_new - INFO - 💾 Fingerprint guardado para 0985139979
+2026-01-30 16:09:19,703 - tigo_auth_new - INFO - 📤 Paso 5: Validando UUID 6d841742bf7a41f6a2aba8236226db3c
+2026-01-30 16:09:19,703 - http_requests - INFO - ============================================================
+2026-01-30 16:09:19,704 - http_requests - INFO - REQUEST: GET https://auth.api.py-tigomoney.io/auth/validate/6d841742bf7a41f6a2aba8236226db3c
+2026-01-30 16:09:19,704 - http_requests - INFO - Headers: {
+  "User-Agent": "Dart/3.7 (dart:io)",
+  "Accept": "*/*",
+  "Accept-Encoding": "gzip",
+  "Content-Type": "application/json",
+  "x-api-key": "dxtyCQG4pUk0FZvpEi8DFwmOEUs4qX0cL4wYL9SCAL5vTgYv",
+  "x-namespace-app": "com.juvo.tigomoney",
+  "x-build-app": "82000060",
+  "x-version-app": "8.2.0"
+}
+2026-01-30 16:09:21,234 - http_requests - INFO - RESPONSE: 200
+2026-01-30 16:09:21,234 - http_requests - INFO - Body: {"next":"LOGIN","kyc_verified":false,"error_manager":null,"account_info":{"lei":null,"name":{"title":"","firstName":"IRIO ISMAEL","middleName":null,"lastName":"MONGES RODRIGUEZ","fullName":"IRIO ISMAEL MONGES RODRIGUEZ","nativeName":""},"subStatus":"BLOQUEO_FALTA_INFO","subStatusId":111,"status":"UNAVAILABLE"}}
+2026-01-30 16:09:21,234 - http_requests - INFO - ============================================================
+2026-01-30 16:09:21,234 - tigo_auth_new - INFO - ✅ UUID validado - Cuenta: IRIO ISMAEL MONGES RODRIGUEZ
+2026-01-30 16:09:21,235 - tigo_auth_new - INFO - 📤 Paso 6: Login final con UUID 6d841742bf7a41f6a2aba8236226db3c
+2026-01-30 16:09:21,235 - http_requests - INFO - ============================================================
+2026-01-30 16:09:21,235 - http_requests - INFO - REQUEST: POST https://auth.api.py-tigomoney.io/auth/login
+2026-01-30 16:09:21,235 - http_requests - INFO - Headers: {
+  "User-Agent": "Dart/3.7 (dart:io)",
+  "Accept": "*/*",
+  "Accept-Encoding": "gzip",
+  "Content-Type": "application/json",
+  "x-api-key": "dxtyCQG4pUk0FZvpEi8DFwmOEUs4qX0cL4wYL9SCAL5vTgYv",
+  "x-namespace-app": "com.juvo.tigomoney",
+  "x-build-app": "82000060",
+  "x-version-app": "8.2.0"
+}
+2026-01-30 16:09:21,235 - http_requests - INFO - Body: {
+  "uuid": "6d841742bf7a41f6a2aba8236226db3c",
+  "password": "0612"
+}
+2026-01-30 16:09:21,878 - http_requests - INFO - RESPONSE: 200
+2026-01-30 16:09:21,878 - http_requests - INFO - Body: {"token_aws":"eyJhbGciOiJIUzM4NCJ9.eyJtdHNUb2tlbiI6ImV5Sk1RVk5VWDBGRFEwVlRVeUk2SWpJd01qWXRNREV0TWprZ01qRTZNVFU2TWpraUxDSlNSVk5GVkNJNklqQWlMQ0pCVlZSSVJVNVVTVU5CVkVsUFRsOVVXVkJGWDFKUFRFVlRJam9pTW53MGZEaDhPU0lzSW5SdmEyVnVYM1I1Y0dVaU9pSmlaV0Z5WlhJaUxDSk1SVlpGVEY5SlJDSTZJalV3TURBaUxDSk5WVk5VWDBGRFEwVlFWRjlNUVZOVVgxUkZVazFUWDBGT1JGOURUMDVFU1ZSSlQwNVRJam9pTUNJc0ltRmpZMlZ6YzE5MGIydGxiaUk2SWpjd1lqTmtNell3WWpNeU9UazRNRGM0TURkaU0yTTFNV0V3WmpnNU9UWmhJaXdpY21WbWNtVnphRjkwYjJ0bGJpSTZJbU5qTXpnelltRmlZVEl4Wm1VMU5XVTBZalEzT0dGaFltVTVOR1F4WmpjeElpd2lRMHhKUlU1VVgxSlBURVVpT2lJeUlpd2lVMVJCVkZWVElqb2lNQ0lzSWtOTVNVVk9WRjlKUkNJNklqSTVOalk0T0RNaUxDSnlaV1p5WlhOb1gyVjRjR2x5WlhOZmFXNGlPaUl6TmpBd01DSXNJbk5qYjNCbElqb2lkM0pwZEdVaUxDSkVSVlpKUTBWZlMwVlpJam9pTURrNE5URXpPVGszT1NJc0lrUkZWa2xEUlY5VVdWQkZYMGxFSWpvaVRVOUNTVXhGSWl3aVpYaHdhWEpsYzE5cGJpSTZOakF3TUN3aVJFVldTVU5GWDBsRUlqb2lNemswT0RBd09TSXNJblZ6WlhKdVlXMWxJam9pTURrNE5URXpPVGszT1NKOSIsInN1YiI6IjA5ODUxMzk5NzkiLCJpYXQiOjE3Njk3ODkzNjEsImV4cCI6MTc2OTc4OTk2MSwiYXV0aF90a
+2026-01-30 16:09:21,878 - http_requests - INFO - ============================================================
+2026-01-30 16:09:21,879 - tigo_auth_new - INFO - 💾 Tokens guardados para 0985139979
+2026-01-30 16:09:21,879 - tigo_auth_new - INFO - ============================================================
+2026-01-30 16:09:21,880 - tigo_auth_new - INFO - ✅ LOGIN EXITOSO
+2026-01-30 16:09:21,880 - tigo_auth_new - INFO -    Usuario: 0985139979
+2026-01-30 16:09:21,880 - tigo_auth_new - INFO -    Nombre: IRIO ISMAEL MONGES RODRIGUEZ
+2026-01-30 16:09:21,880 - tigo_auth_new - INFO -    Token expira en: 6000s
+2026-01-30 16:09:21,880 - tigo_auth_new - INFO - ============================================================
+2026-01-30 16:09:21,880 - tigo_auth_new - INFO - ✅ Cuenta 0985139979 inicializada correctamente
+2026-01-30 16:09:21,880 - tigo_auth_new - INFO - 
+============================================================
+2026-01-30 16:09:21,880 - tigo_auth_new - INFO - 📊 RESUMEN DE INICIALIZACIÓN
+2026-01-30 16:09:21,881 - tigo_auth_new - INFO -    Exitosas: 2 - ['0985308247', '0985139979']
+2026-01-30 16:09:21,881 - tigo_auth_new - INFO -    Fallidas: 0 - []
+2026-01-30 16:09:21,881 - tigo_auth_new - INFO - ============================================================
+2026-01-30 16:09:21,881 - __main__ - INFO - ✅ Sistema inicializado: READY: Todas las cuentas inicializadas
+2026-01-30 16:09:21,881 - __main__ - INFO - ✅ Sistema listo - Estado: READY
+2026-01-30 16:09:21,902 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://155.117.45.228:5000
+2026-01-30 16:09:21,902 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2026-01-30 16:10:04,660 - key_manager - INFO - Clave generada: YWESX77K... - Monto: 1000000
+2026-01-30 16:10:04,661 - werkzeug - INFO - 186.33.35.65 - - [30/Jan/2026 16:10:04] "[35m[1mPOST /api/admin/keys HTTP/1.1[0m" 201 -
+2026-01-30 16:10:12,036 - werkzeug - INFO - 186.33.35.65 - - [30/Jan/2026 16:10:12] "[31m[1mGET /api/packages?destination=0982590181 HTTP/1.1[0m" 401 -
+2026-01-30 16:10:16,604 - tigo_api - INFO - 📦 Consultando paquetes para: 0982590181
+2026-01-30 16:10:19,022 - tigo_api - INFO - ✅ 22 paquetes encontrados
+2026-01-30 16:10:19,023 - werkzeug - INFO - 186.33.35.65 - - [30/Jan/2026 16:10:19] "GET /api/packages?destination=0982590181 HTTP/1.1" 200 -
+2026-01-30 16:13:08,944 - werkzeug - INFO - 186.33.35.65 - - [30/Jan/2026 16:13:08] "[31m[1mGET /api/balance HTTP/1.1[0m" 401 -
+2026-01-30 16:13:28,081 - werkzeug - INFO - 186.33.35.65 - - [30/Jan/2026 16:13:28] "GET /api/balance HTTP/1.1" 200 -
+2026-01-30 16:20:20,653 - tigo_api - INFO - 📦 Consultando paquetes para: 0982590181
+2026-01-30 16:20:22,289 - tigo_api - WARNING - Error 403, renovando token...
+2026-01-30 16:20:22,289 - tigo_auth_new - INFO - Forzando renovación de tokens...
+2026-01-30 16:20:22,289 - tigo_auth_new - INFO - ============================================================
+2026-01-30 16:20:22,290 - tigo_auth_new - INFO - 🚀 INICIANDO AUTENTICACIÓN - 0985308247
+2026-01-30 16:20:22,290 - tigo_auth_new - INFO - ============================================================
+2026-01-30 16:20:22,290 - tigo_auth_new - INFO - ✅ Tokens válidos cargados para 0985308247
+2026-01-30 16:20:22,290 - tigo_auth_new - INFO - ✅ Usando tokens existentes válidos
+2026-01-30 16:20:22,943 - tigo_api - ERROR - Error HTTP 403: {"Message":"User is not authorized to access this resource with an explicit deny in an identity-based policy"}
+2026-01-30 16:20:22,945 - werkzeug - INFO - 186.33.35.65 - - [30/Jan/2026 16:20:22] "[35m[1mGET /api/packages?destination=0982590181 HTTP/1.1[0m" 500 -
+2026-01-30 16:20:24,761 - tigo_api - INFO - 📦 Consultando paquetes para: 0982590181
+2026-01-30 16:20:25,450 - tigo_api - WARNING - Error 403, renovando token...
+2026-01-30 16:20:25,451 - tigo_auth_new - INFO - Forzando renovación de tokens...
+2026-01-30 16:20:25,451 - tigo_auth_new - INFO - ============================================================
+2026-01-30 16:20:25,451 - tigo_auth_new - INFO - 🚀 INICIANDO AUTENTICACIÓN - 0985308247
+2026-01-30 16:20:25,452 - tigo_auth_new - INFO - ============================================================
+2026-01-30 16:20:25,452 - tigo_auth_new - INFO - ✅ Tokens válidos cargados para 0985308247
+2026-01-30 16:20:25,453 - tigo_auth_new - INFO - ✅ Usando tokens existentes válidos
+2026-01-30 16:20:25,868 - tigo_api - ERROR - Error HTTP 403: {"Message":"User is not authorized to access this resource with an explicit deny in an identity-based policy"}
+2026-01-30 16:20:25,869 - werkzeug - INFO - 186.33.35.65 - - [30/Jan/2026 16:20:25] "[35m[1mGET /api/packages?destination=0982590181 HTTP/1.1[0m" 500 -
+2026-01-30 16:20:59,408 - tigo_auth_new - INFO - 📱 Fingerprint cargado para 0985308247: be71761898e0d4ee
+2026-01-30 16:20:59,408 - tigo_auth_new - INFO - 📱 Fingerprint cargado para 0985139979: 93f6d8434eece48d
+2026-01-30 16:20:59,424 - __main__ - INFO - ============================================================
+2026-01-30 16:20:59,425 - __main__ - INFO - INICIANDO API REST DE RECARGAS TIGO v2.1
+2026-01-30 16:20:59,425 - __main__ - INFO - Puerto: 5000
+2026-01-30 16:20:59,425 - __main__ - INFO - Cuentas configuradas: ['0985308247', '0985139979']
+2026-01-30 16:20:59,425 - __main__ - INFO - ============================================================
+2026-01-30 16:20:59,426 - __main__ - INFO - Ejecutando inicialización dual de cuentas...
+2026-01-30 16:20:59,426 - __main__ - INFO - ============================================================
+2026-01-30 16:20:59,426 - __main__ - INFO - INICIALIZANDO SISTEMA DE AUTENTICACIÓN
+2026-01-30 16:20:59,426 - __main__ - INFO - Método: Nuevo
+2026-01-30 16:20:59,426 - __main__ - INFO - Cuenta: Por defecto
+2026-01-30 16:20:59,426 - __main__ - INFO - ============================================================
+2026-01-30 16:20:59,426 - tigo_auth_new - INFO - ============================================================
+2026-01-30 16:20:59,426 - tigo_auth_new - INFO - 🚀 INICIALIZACIÓN DUAL DE CUENTAS
+2026-01-30 16:20:59,427 - tigo_auth_new - INFO - ============================================================
+2026-01-30 16:20:59,427 - tigo_auth_new - INFO - 
+📱 Intentando cuenta: 0985308247
+2026-01-30 16:20:59,427 - tigo_auth_new - INFO - ============================================================
+2026-01-30 16:20:59,427 - tigo_auth_new - INFO - 🚀 INICIANDO AUTENTICACIÓN - 0985308247
+2026-01-30 16:20:59,427 - tigo_auth_new - INFO - ============================================================
+2026-01-30 16:20:59,428 - tigo_auth_new - INFO - ✅ Tokens válidos cargados para 0985308247
+2026-01-30 16:20:59,428 - tigo_auth_new - INFO - ✅ Usando tokens existentes válidos
+2026-01-30 16:20:59,428 - tigo_auth_new - INFO - ✅ Cuenta 0985308247 inicializada correctamente
+2026-01-30 16:20:59,428 - tigo_auth_new - INFO - 
+📱 Intentando cuenta: 0985139979
+2026-01-30 16:20:59,428 - tigo_auth_new - INFO - ============================================================
+2026-01-30 16:20:59,428 - tigo_auth_new - INFO - 🚀 INICIANDO AUTENTICACIÓN - 0985139979
+2026-01-30 16:20:59,428 - tigo_auth_new - INFO - ============================================================
+2026-01-30 16:20:59,429 - tigo_auth_new - INFO - ✅ Tokens válidos cargados para 0985139979
+2026-01-30 16:20:59,429 - tigo_auth_new - INFO - ✅ Usando tokens existentes válidos
+2026-01-30 16:20:59,429 - tigo_auth_new - INFO - ✅ Cuenta 0985139979 inicializada correctamente
+2026-01-30 16:20:59,429 - tigo_auth_new - INFO - 
+============================================================
+2026-01-30 16:20:59,429 - tigo_auth_new - INFO - 📊 RESUMEN DE INICIALIZACIÓN
+2026-01-30 16:20:59,429 - tigo_auth_new - INFO -    Exitosas: 2 - ['0985308247', '0985139979']
+2026-01-30 16:20:59,429 - tigo_auth_new - INFO -    Fallidas: 0 - []
+2026-01-30 16:20:59,430 - tigo_auth_new - INFO - ============================================================
+2026-01-30 16:20:59,430 - __main__ - INFO - ✅ Sistema inicializado: READY: Todas las cuentas inicializadas
+2026-01-30 16:20:59,430 - __main__ - INFO - ✅ Sistema listo - Estado: READY
+2026-01-30 16:20:59,452 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://155.117.45.228:5000
+2026-01-30 16:20:59,452 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2026-01-30 16:21:04,769 - tigo_api - INFO - 📦 Consultando paquetes para: 0982590181
+2026-01-30 16:21:06,379 - tigo_api - WARNING - Error 403, renovando token...
+2026-01-30 16:21:06,379 - tigo_auth_new - INFO - Forzando renovación de tokens...
+2026-01-30 16:21:06,379 - tigo_auth_new - INFO - ============================================================
+2026-01-30 16:21:06,379 - tigo_auth_new - INFO - 🚀 INICIANDO AUTENTICACIÓN - 0985308247
+2026-01-30 16:21:06,380 - tigo_auth_new - INFO - ============================================================
+2026-01-30 16:21:06,380 - tigo_auth_new - INFO - ✅ Tokens válidos cargados para 0985308247
+2026-01-30 16:21:06,380 - tigo_auth_new - INFO - ✅ Usando tokens existentes válidos
+2026-01-30 16:21:06,862 - tigo_api - ERROR - Error HTTP 403: {"Message":"User is not authorized to access this resource with an explicit deny in an identity-based policy"}
+2026-01-30 16:21:06,863 - werkzeug - INFO - 186.33.35.65 - - [30/Jan/2026 16:21:06] "[35m[1mGET /api/packages?destination=0982590181 HTTP/1.1[0m" 500 -
+2026-01-30 16:32:33,487 - tigo_auth_new - INFO - 📱 Fingerprint cargado para 0985308247: be71761898e0d4ee
+2026-01-30 16:32:33,488 - tigo_auth_new - INFO - 📱 Fingerprint cargado para 0985139979: 93f6d8434eece48d
+2026-01-30 16:32:33,499 - __main__ - INFO - ============================================================
+2026-01-30 16:32:33,500 - __main__ - INFO - INICIANDO API REST DE RECARGAS TIGO v2.1
+2026-01-30 16:32:33,500 - __main__ - INFO - Puerto: 5000
+2026-01-30 16:32:33,500 - __main__ - INFO - Cuentas configuradas: ['0985308247', '0985139979']
+2026-01-30 16:32:33,500 - __main__ - INFO - ============================================================
+2026-01-30 16:32:33,500 - __main__ - INFO - Ejecutando inicialización dual de cuentas...
+2026-01-30 16:32:33,500 - __main__ - INFO - ============================================================
+2026-01-30 16:32:33,500 - __main__ - INFO - INICIALIZANDO SISTEMA DE AUTENTICACIÓN
+2026-01-30 16:32:33,501 - __main__ - INFO - Método: Nuevo
+2026-01-30 16:32:33,501 - __main__ - INFO - Cuenta: Por defecto
+2026-01-30 16:32:33,501 - __main__ - INFO - ============================================================
+2026-01-30 16:32:33,501 - tigo_auth_new - INFO - ============================================================
+2026-01-30 16:32:33,501 - tigo_auth_new - INFO - 🚀 INICIALIZACIÓN DUAL DE CUENTAS
+2026-01-30 16:32:33,501 - tigo_auth_new - INFO - ============================================================
+2026-01-30 16:32:33,501 - tigo_auth_new - INFO - 
+📱 Intentando cuenta: 0985308247
+2026-01-30 16:32:33,501 - tigo_auth_new - INFO - ============================================================
+2026-01-30 16:32:33,501 - tigo_auth_new - INFO - 🚀 INICIANDO AUTENTICACIÓN - 0985308247
+2026-01-30 16:32:33,501 - tigo_auth_new - INFO - ============================================================
+2026-01-30 16:32:33,502 - tigo_auth_new - INFO - ✅ Tokens válidos cargados para 0985308247
+2026-01-30 16:32:33,502 - tigo_auth_new - INFO - ✅ Usando tokens existentes válidos
+2026-01-30 16:32:33,502 - tigo_auth_new - INFO - ✅ Cuenta 0985308247 inicializada correctamente
+2026-01-30 16:32:33,502 - tigo_auth_new - INFO - 
+📱 Intentando cuenta: 0985139979
+2026-01-30 16:32:33,502 - tigo_auth_new - INFO - ============================================================
+2026-01-30 16:32:33,502 - tigo_auth_new - INFO - 🚀 INICIANDO AUTENTICACIÓN - 0985139979
+2026-01-30 16:32:33,502 - tigo_auth_new - INFO - ============================================================
+2026-01-30 16:32:33,503 - tigo_auth_new - INFO - ✅ Tokens válidos cargados para 0985139979
+2026-01-30 16:32:33,503 - tigo_auth_new - INFO - ✅ Usando tokens existentes válidos
+2026-01-30 16:32:33,503 - tigo_auth_new - INFO - ✅ Cuenta 0985139979 inicializada correctamente
+2026-01-30 16:32:33,503 - tigo_auth_new - INFO - 
+============================================================
+2026-01-30 16:32:33,503 - tigo_auth_new - INFO - 📊 RESUMEN DE INICIALIZACIÓN
+2026-01-30 16:32:33,503 - tigo_auth_new - INFO -    Exitosas: 2 - ['0985308247', '0985139979']
+2026-01-30 16:32:33,503 - tigo_auth_new - INFO -    Fallidas: 0 - []
+2026-01-30 16:32:33,503 - tigo_auth_new - INFO - ============================================================
+2026-01-30 16:32:33,504 - __main__ - INFO - ✅ Sistema inicializado: READY: Todas las cuentas inicializadas
+2026-01-30 16:32:33,504 - __main__ - INFO - ✅ Sistema listo - Estado: READY
+2026-01-30 16:32:33,526 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://155.117.45.228:5000
+2026-01-30 16:32:33,526 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2026-01-30 16:32:57,066 - tigo_api - INFO - 📦 Consultando paquetes para: 0982590181
+2026-01-30 16:32:58,648 - tigo_api - WARNING - Error 403, renovando token...
+2026-01-30 16:32:58,648 - tigo_auth_new - INFO - ============================================================
+2026-01-30 16:32:58,648 - tigo_auth_new - INFO - 🔄 FORZANDO RENOVACIÓN DE TOKEN
+2026-01-30 16:32:58,649 - tigo_auth_new - INFO - ============================================================
+2026-01-30 16:32:58,649 - tigo_auth_new - INFO - 🗑️ Tokens eliminados del archivo para 0985308247
+2026-01-30 16:32:58,650 - tigo_auth_new - INFO - ✅ Fingerprint disponible: be717618...
+2026-01-30 16:32:58,650 - tigo_auth_new - INFO - 🔐 Renovación rápida con fingerprint existente
+2026-01-30 16:32:58,650 - tigo_auth_new - INFO - 📤 Paso 1: Access Task para 0985308247
+2026-01-30 16:32:58,650 - http_requests - INFO - ============================================================
+2026-01-30 16:32:58,650 - http_requests - INFO - REQUEST: POST https://auth.api.py-tigomoney.io/access/task
+2026-01-30 16:32:58,650 - http_requests - INFO - Headers: {
+  "User-Agent": "Dart/3.7 (dart:io)",
+  "Accept": "*/*",
+  "Accept-Encoding": "gzip",
+  "Content-Type": "application/json",
+  "x-api-key": "dxtyCQG4pUk0FZvpEi8DFwmOEUs4qX0cL4wYL9SCAL5vTgYv",
+  "x-namespace-app": "com.juvo.tigomoney",
+  "x-build-app": "82000060",
+  "x-version-app": "8.2.0"
+}
+2026-01-30 16:32:58,650 - http_requests - INFO - Body: {
+  "username": "0985308247",
+  "fingerprint": "be71761898e0d4ee",
+  "model": "iPhone 2026 Pro Max"
+}
+2026-01-30 16:33:00,471 - http_requests - INFO - RESPONSE: 200
+2026-01-30 16:33:00,472 - http_requests - INFO - Body: {"otp":false,"uuid":"51817708878743b1b90f020c5f76aae3"}
+2026-01-30 16:33:00,472 - http_requests - INFO - ============================================================
+2026-01-30 16:33:00,472 - tigo_auth_new - INFO - ✅ Access Task exitoso - UUID: 51817708878743b1b90f020c5f76aae3, OTP requerido: False
+2026-01-30 16:33:00,472 - tigo_auth_new - INFO - 📤 Paso 5: Validando UUID 51817708878743b1b90f020c5f76aae3
+2026-01-30 16:33:00,472 - http_requests - INFO - ============================================================
+2026-01-30 16:33:00,472 - http_requests - INFO - REQUEST: GET https://auth.api.py-tigomoney.io/auth/validate/51817708878743b1b90f020c5f76aae3
+2026-01-30 16:33:00,473 - http_requests - INFO - Headers: {
+  "User-Agent": "Dart/3.7 (dart:io)",
+  "Accept": "*/*",
+  "Accept-Encoding": "gzip",
+  "Content-Type": "application/json",
+  "x-api-key": "dxtyCQG4pUk0FZvpEi8DFwmOEUs4qX0cL4wYL9SCAL5vTgYv",
+  "x-namespace-app": "com.juvo.tigomoney",
+  "x-build-app": "82000060",
+  "x-version-app": "8.2.0"
+}
+2026-01-30 16:33:02,102 - http_requests - INFO - RESPONSE: 200
+2026-01-30 16:33:02,102 - http_requests - INFO - Body: {"next":"LOGIN","kyc_verified":false,"error_manager":null,"account_info":{"lei":null,"name":{"title":"","firstName":"JOSE LUIS","middleName":null,"lastName":"CABALLERO GAVILAN","fullName":"JOSE LUIS CABALLERO GAVILAN","nativeName":""},"subStatus":"ACTIVA","subStatusId":100,"status":"AVAILABLE"}}
+2026-01-30 16:33:02,102 - http_requests - INFO - ============================================================
+2026-01-30 16:33:02,103 - tigo_auth_new - INFO - ✅ UUID validado - Cuenta: JOSE LUIS CABALLERO GAVILAN
+2026-01-30 16:33:02,103 - tigo_auth_new - INFO - 📤 Paso 6: Login final con UUID 51817708878743b1b90f020c5f76aae3
+2026-01-30 16:33:02,103 - http_requests - INFO - ============================================================
+2026-01-30 16:33:02,103 - http_requests - INFO - REQUEST: POST https://auth.api.py-tigomoney.io/auth/login
+2026-01-30 16:33:02,103 - http_requests - INFO - Headers: {
+  "User-Agent": "Dart/3.7 (dart:io)",
+  "Accept": "*/*",
+  "Accept-Encoding": "gzip",
+  "Content-Type": "application/json",
+  "x-api-key": "dxtyCQG4pUk0FZvpEi8DFwmOEUs4qX0cL4wYL9SCAL5vTgYv",
+  "x-namespace-app": "com.juvo.tigomoney",
+  "x-build-app": "82000060",
+  "x-version-app": "8.2.0"
+}
+2026-01-30 16:33:02,104 - http_requests - INFO - Body: {
+  "uuid": "51817708878743b1b90f020c5f76aae3",
+  "password": "0612"
+}
+2026-01-30 16:33:02,863 - http_requests - INFO - RESPONSE: 200
+2026-01-30 16:33:02,863 - http_requests - INFO - Body: {"token_aws":"eyJhbGciOiJIUzM4NCJ9.eyJtdHNUb2tlbiI6ImV5Sk1RVk5VWDBGRFEwVlRVeUk2SWpJd01qWXRNREV0TXpBZ01UTTZNRGs2TVRNaUxDSlNSVk5GVkNJNklqQWlMQ0pCVlZSSVJVNVVTVU5CVkVsUFRsOVVXVkJGWDFKUFRFVlRJam9pTW53MGZEaDhPU0lzSW5SdmEyVnVYM1I1Y0dVaU9pSmlaV0Z5WlhJaUxDSk1SVlpGVEY5SlJDSTZJalV3TURBaUxDSk5WVk5VWDBGRFEwVlFWRjlNUVZOVVgxUkZVazFUWDBGT1JGOURUMDVFU1ZSSlQwNVRJam9pTUNJc0ltRmpZMlZ6YzE5MGIydGxiaUk2SW1RMk5XVTVaVFJrT1dWbU16Wm1NakV3TVRRNU1qSmhNakkzWVRoaFpUazVJaXdpY21WbWNtVnphRjkwYjJ0bGJpSTZJalk1TW1WaFpUQXhZVGd3TkRsbU56TXlObVV5WTJGalpHSXpORFkyTjJReklpd2lRMHhKUlU1VVgxSlBURVVpT2lJeUlpd2lVMVJCVkZWVElqb2lNQ0lzSWtOTVNVVk9WRjlKUkNJNklqVXdPRGM0TVNJc0luSmxabkpsYzJoZlpYaHdhWEpsYzE5cGJpSTZJak0yTURBd0lpd2ljMk52Y0dVaU9pSjNjbWwwWlNJc0lrUkZWa2xEUlY5TFJWa2lPaUl3T1RnMU16QTRNalEzSWl3aVJFVldTVU5GWDFSWlVFVmZTVVFpT2lKTlQwSkpURVVpTENKbGVIQnBjbVZ6WDJsdUlqbzJNREF3TENKRVJWWkpRMFZmU1VRaU9pSXpPRGcxTWpBeklpd2lkWE5sY201aGJXVWlPaUl3T1RnMU16QTRNalEzSW4wPSIsInN1YiI6IjA5ODUzMDgyNDciLCJpYXQiOjE3Njk3OTA3ODIsImV4cCI6MTc2OTc5MTM4MiwiYXV0aF90a
+2026-01-30 16:33:02,864 - http_requests - INFO - ============================================================
+2026-01-30 16:33:02,865 - tigo_auth_new - INFO - 💾 Tokens guardados para 0985308247
+2026-01-30 16:33:02,865 - tigo_auth_new - INFO - ============================================================
+2026-01-30 16:33:02,865 - tigo_auth_new - INFO - ✅ LOGIN EXITOSO
+2026-01-30 16:33:02,865 - tigo_auth_new - INFO -    Usuario: 0985308247
+2026-01-30 16:33:02,865 - tigo_auth_new - INFO -    Nombre: JOSE LUIS CABALLERO GAVILAN
+2026-01-30 16:33:02,865 - tigo_auth_new - INFO -    Token expira en: 6000s
+2026-01-30 16:33:02,866 - tigo_auth_new - INFO - ============================================================
+2026-01-30 16:33:02,866 - tigo_auth_new - INFO - ✅ Renovación de token exitosa
+2026-01-30 16:33:04,372 - tigo_api - INFO - ✅ 22 paquetes encontrados
+2026-01-30 16:33:04,374 - werkzeug - INFO - 186.33.35.65 - - [30/Jan/2026 16:33:04] "GET /api/packages?destination=0982590181 HTTP/1.1" 200 -
+2026-01-30 16:33:08,383 - tigo_api - INFO - 📦 Consultando paquetes para: 0982590181
+2026-01-30 16:33:09,051 - tigo_api - INFO - ✅ 22 paquetes encontrados
+2026-01-30 16:33:09,053 - werkzeug - INFO - 186.33.35.65 - - [30/Jan/2026 16:33:09] "GET /api/packages?destination=0982590181 HTTP/1.1" 200 -
+2026-01-30 16:33:56,091 - tigo_api - INFO - 📦 Consultando paquetes para: 0982590181
+2026-01-30 16:33:57,807 - tigo_api - INFO - ✅ 22 paquetes encontrados
+2026-01-30 16:33:57,808 - __main__ - INFO - 📱 Recarga: 0982590181 - 7GB+ilimTDx55000Gsx30D - Gs. 55,000
+2026-01-30 16:33:57,808 - tigo_api - INFO - 🚀 Iniciando recarga: 0982590181 - 7GB+ilimTDx55000Gsx30D
+2026-01-30 16:33:57,809 - tigo_api - INFO - 💳 Creando orden: 0982590181 - 7GB+ilimTDx55000Gsx30D - ID: 837809922329992
+2026-01-30 16:33:58,670 - tigo_api - INFO - ✅ Orden creada: 672812207
+2026-01-30 16:33:58,670 - tigo_api - INFO - ⏳ Esperando completación de orden 672812207
+2026-01-30 16:33:59,341 - tigo_api - INFO - Estado: Open | Pago: Open | Fulfillment: 
+2026-01-30 16:34:03,983 - tigo_api - INFO - Estado: Refund Completed | Pago: Refunded | Fulfillment: Fulfillment Failed
+2026-01-30 16:34:03,985 - werkzeug - INFO - 186.33.35.65 - - [30/Jan/2026 16:34:03] "[35m[1mPOST /api/recharge HTTP/1.1[0m" 500 -
+2026-01-30 16:35:28,542 - werkzeug - INFO - 186.33.35.65 - - [30/Jan/2026 16:35:28] "GET /api/balance HTTP/1.1" 200 -
+2026-01-30 16:36:35,594 - tigo_api - INFO - 📦 Consultando paquetes para: 0985308247
+2026-01-30 16:36:38,270 - tigo_api - INFO - ✅ 22 paquetes encontrados
+2026-01-30 16:36:38,271 - __main__ - INFO - 📱 Recarga: 0985308247 - 7GB+ilimTDx55000Gsx30D - Gs. 55,000
+2026-01-30 16:36:38,271 - tigo_api - INFO - 🚀 Iniciando recarga: 0985308247 - 7GB+ilimTDx55000Gsx30D
+2026-01-30 16:36:38,271 - tigo_api - INFO - 💳 Creando orden: 0985308247 - 7GB+ilimTDx55000Gsx30D - ID: 998271417222577
+2026-01-30 16:36:39,248 - tigo_api - INFO - ✅ Orden creada: 672814068
+2026-01-30 16:36:39,249 - tigo_api - INFO - ⏳ Esperando completación de orden 672814068
+2026-01-30 16:36:40,348 - tigo_api - INFO - Estado: Open | Pago: Open | Fulfillment: 
+2026-01-30 16:36:45,165 - tigo_api - INFO - Estado: Fulfillment Succeeded | Pago: Approved | Fulfillment: Fulfillment Succeeded
+2026-01-30 16:36:45,166 - tigo_api - INFO - ✅ Recarga completada - Orden 672814068
+2026-01-30 16:36:45,168 - werkzeug - INFO - 186.33.35.65 - - [30/Jan/2026 16:36:45] "POST /api/recharge HTTP/1.1" 200 -
+2026-01-30 16:44:54,997 - tigo_api - INFO - 📦 Consultando paquetes para: 0982590181
+2026-01-30 16:44:56,555 - tigo_api - WARNING - Error 403, renovando token...
+2026-01-30 16:44:56,555 - tigo_auth_new - INFO - ============================================================
+2026-01-30 16:44:56,555 - tigo_auth_new - INFO - 🔄 FORZANDO RENOVACIÓN DE TOKEN
+2026-01-30 16:44:56,555 - tigo_auth_new - INFO - ============================================================
+2026-01-30 16:44:56,556 - tigo_auth_new - INFO - 🗑️ Tokens eliminados del archivo para 0985308247
+2026-01-30 16:44:56,557 - tigo_auth_new - INFO - ✅ Fingerprint disponible: be717618...
+2026-01-30 16:44:56,557 - tigo_auth_new - INFO - 🔐 Renovación rápida con fingerprint existente
+2026-01-30 16:44:56,557 - tigo_auth_new - INFO - 📤 Paso 1: Access Task para 0985308247
+2026-01-30 16:44:56,557 - http_requests - INFO - ============================================================
+2026-01-30 16:44:56,558 - http_requests - INFO - REQUEST: POST https://auth.api.py-tigomoney.io/access/task
+2026-01-30 16:44:56,558 - http_requests - INFO - Headers: {
+  "User-Agent": "Dart/3.7 (dart:io)",
+  "Accept": "*/*",
+  "Accept-Encoding": "gzip",
+  "Content-Type": "application/json",
+  "x-api-key": "dxtyCQG4pUk0FZvpEi8DFwmOEUs4qX0cL4wYL9SCAL5vTgYv",
+  "x-namespace-app": "com.juvo.tigomoney",
+  "x-build-app": "82000060",
+  "x-version-app": "8.2.0"
+}
+2026-01-30 16:44:56,558 - http_requests - INFO - Body: {
+  "username": "0985308247",
+  "fingerprint": "be71761898e0d4ee",
+  "model": "iPhone 2026 Pro Max"
+}
+2026-01-30 16:44:58,001 - http_requests - INFO - RESPONSE: 200
+2026-01-30 16:44:58,002 - http_requests - INFO - Body: {"otp":false,"uuid":"4c25bc55f39846e982cd4cf53882063f"}
+2026-01-30 16:44:58,002 - http_requests - INFO - ============================================================
+2026-01-30 16:44:58,002 - tigo_auth_new - INFO - ✅ Access Task exitoso - UUID: 4c25bc55f39846e982cd4cf53882063f, OTP requerido: False
+2026-01-30 16:44:58,002 - tigo_auth_new - INFO - 📤 Paso 5: Validando UUID 4c25bc55f39846e982cd4cf53882063f
+2026-01-30 16:44:58,002 - http_requests - INFO - ============================================================
+2026-01-30 16:44:58,003 - http_requests - INFO - REQUEST: GET https://auth.api.py-tigomoney.io/auth/validate/4c25bc55f39846e982cd4cf53882063f
+2026-01-30 16:44:58,003 - http_requests - INFO - Headers: {
+  "User-Agent": "Dart/3.7 (dart:io)",
+  "Accept": "*/*",
+  "Accept-Encoding": "gzip",
+  "Content-Type": "application/json",
+  "x-api-key": "dxtyCQG4pUk0FZvpEi8DFwmOEUs4qX0cL4wYL9SCAL5vTgYv",
+  "x-namespace-app": "com.juvo.tigomoney",
+  "x-build-app": "82000060",
+  "x-version-app": "8.2.0"
+}
+2026-01-30 16:44:59,529 - http_requests - INFO - RESPONSE: 200
+2026-01-30 16:44:59,529 - http_requests - INFO - Body: {"next":"LOGIN","kyc_verified":false,"error_manager":null,"account_info":{"lei":null,"name":{"title":"","firstName":"JOSE LUIS","middleName":null,"lastName":"CABALLERO GAVILAN","fullName":"JOSE LUIS CABALLERO GAVILAN","nativeName":""},"subStatus":"ACTIVA","subStatusId":100,"status":"AVAILABLE"}}
+2026-01-30 16:44:59,530 - http_requests - INFO - ============================================================
+2026-01-30 16:44:59,530 - tigo_auth_new - INFO - ✅ UUID validado - Cuenta: JOSE LUIS CABALLERO GAVILAN
+2026-01-30 16:44:59,530 - tigo_auth_new - INFO - 📤 Paso 6: Login final con UUID 4c25bc55f39846e982cd4cf53882063f
+2026-01-30 16:44:59,530 - http_requests - INFO - ============================================================
+2026-01-30 16:44:59,530 - http_requests - INFO - REQUEST: POST https://auth.api.py-tigomoney.io/auth/login
+2026-01-30 16:44:59,531 - http_requests - INFO - Headers: {
+  "User-Agent": "Dart/3.7 (dart:io)",
+  "Accept": "*/*",
+  "Accept-Encoding": "gzip",
+  "Content-Type": "application/json",
+  "x-api-key": "dxtyCQG4pUk0FZvpEi8DFwmOEUs4qX0cL4wYL9SCAL5vTgYv",
+  "x-namespace-app": "com.juvo.tigomoney",
+  "x-build-app": "82000060",
+  "x-version-app": "8.2.0"
+}
+2026-01-30 16:44:59,531 - http_requests - INFO - Body: {
+  "uuid": "4c25bc55f39846e982cd4cf53882063f",
+  "password": "0612"
+}
+2026-01-30 16:45:00,286 - http_requests - INFO - RESPONSE: 200
+2026-01-30 16:45:00,287 - http_requests - INFO - Body: {"token_aws":"eyJhbGciOiJIUzM4NCJ9.eyJtdHNUb2tlbiI6ImV5Sk1RVk5VWDBGRFEwVlRVeUk2SWpJd01qWXRNREV0TXpBZ01UTTZNek02TURJaUxDSlNSVk5GVkNJNklqQWlMQ0pCVlZSSVJVNVVTVU5CVkVsUFRsOVVXVkJGWDFKUFRFVlRJam9pTW53MGZEaDhPU0lzSW5SdmEyVnVYM1I1Y0dVaU9pSmlaV0Z5WlhJaUxDSk1SVlpGVEY5SlJDSTZJalV3TURBaUxDSk5WVk5VWDBGRFEwVlFWRjlNUVZOVVgxUkZVazFUWDBGT1JGOURUMDVFU1ZSSlQwNVRJam9pTUNJc0ltRmpZMlZ6YzE5MGIydGxiaUk2SWpVNE5qbGlPR05sTVRjME56aGtNRFEwTlRObFpERXlOVFE1WVdWaFltUTBJaXdpY21WbWNtVnphRjkwYjJ0bGJpSTZJbVpsWTJNeVl6Y3paREJtTXpneU9UVmtORGd5TlRrNU9XRmtaR1U1WTJWbUlpd2lRMHhKUlU1VVgxSlBURVVpT2lJeUlpd2lVMVJCVkZWVElqb2lNQ0lzSWtOTVNVVk9WRjlKUkNJNklqVXdPRGM0TVNJc0luSmxabkpsYzJoZlpYaHdhWEpsYzE5cGJpSTZJak0yTURBd0lpd2ljMk52Y0dVaU9pSjNjbWwwWlNJc0lrUkZWa2xEUlY5TFJWa2lPaUl3T1RnMU16QTRNalEzSWl3aVJFVldTVU5GWDFSWlVFVmZTVVFpT2lKTlQwSkpURVVpTENKbGVIQnBjbVZ6WDJsdUlqbzJNREF3TENKRVJWWkpRMFZmU1VRaU9pSXpPRGcxTWpBeklpd2lkWE5sY201aGJXVWlPaUl3T1RnMU16QTRNalEzSW4wPSIsInN1YiI6IjA5ODUzMDgyNDciLCJpYXQiOjE3Njk3OTE0OTksImV4cCI6MTc2OTc5MjA5OSwiYXV0aF90a
+2026-01-30 16:45:00,287 - http_requests - INFO - ============================================================
+2026-01-30 16:45:00,288 - tigo_auth_new - INFO - 💾 Tokens guardados para 0985308247
+2026-01-30 16:45:00,289 - tigo_auth_new - INFO - ============================================================
+2026-01-30 16:45:00,289 - tigo_auth_new - INFO - ✅ LOGIN EXITOSO
+2026-01-30 16:45:00,289 - tigo_auth_new - INFO -    Usuario: 0985308247
+2026-01-30 16:45:00,289 - tigo_auth_new - INFO -    Nombre: JOSE LUIS CABALLERO GAVILAN
+2026-01-30 16:45:00,289 - tigo_auth_new - INFO -    Token expira en: 6000s
+2026-01-30 16:45:00,289 - tigo_auth_new - INFO - ============================================================
+2026-01-30 16:45:00,289 - tigo_auth_new - INFO - ✅ Renovación de token exitosa
+2026-01-30 16:45:01,449 - tigo_api - INFO - ✅ 22 paquetes encontrados
+2026-01-30 16:45:01,451 - werkzeug - INFO - 186.33.35.65 - - [30/Jan/2026 16:45:01] "GET /api/packages?destination=0982590181 HTTP/1.1" 200 -
+2026-01-30 16:45:35,162 - tigo_api - INFO - 📦 Consultando paquetes para: 0982590181
+2026-01-30 16:45:36,200 - tigo_api - INFO - ✅ 22 paquetes encontrados
+2026-01-30 16:45:36,201 - werkzeug - INFO - 186.33.35.65 - - [30/Jan/2026 16:45:36] "GET /api/packages?destination=0982590181 HTTP/1.1" 200 -

@@ -1,0 +1,26 @@
+[
+  {
+    "timestamp": "2026-01-30T16:36:45.167294",
+    "api_key": "YWESX77K...",
+    "destination": "0985308247",
+    "package_id": "1384",
+    "package_name": "7GB+ilimTDx55000Gsx30D",
+    "amount": 55000,
+    "status": "SUCCESS",
+    "order_id": 672814068,
+    "transaction_id": "671939872",
+    "error": ""
+  },
+  {
+    "timestamp": "2026-01-30T16:34:03.984387",
+    "api_key": "YWESX77K...",
+    "destination": "0982590181",
+    "package_id": "1384",
+    "package_name": "7GB+ilimTDx55000Gsx30D",
+    "amount": 55000,
+    "status": "FAILED",
+    "order_id": 672812207,
+    "transaction_id": "671938014",
+    "error": "Recarga cancelada y reembolsada"
+  }
+]

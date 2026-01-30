@@ -1,0 +1,2 @@
+# Bot Telegram OTP - Dependencias
+python-telegram-bot==20.7
