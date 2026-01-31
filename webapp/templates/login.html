@@ -3,32 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Recargas Tigo</title>
+    <title>Login - Sistema de Recargas Tigo</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        :root {
-            --primary: #667eea;
-            --secondary: #764ba2;
-        }
         body {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-family: 'Segoe UI', system-ui, sans-serif;
         }
         .login-container {
-            max-width: 420px;
+            max-width: 400px;
             width: 100%;
             padding: 20px;
         }
         .login-card {
             background: white;
             border-radius: 20px;
-            padding: 40px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 40px 30px;
         }
         .login-header {
             text-align: center;
@@ -36,29 +31,8 @@
         }
         .login-header i {
             font-size: 60px;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        .form-control {
-            padding: 12px 15px;
-            border-radius: 10px;
-            border: 2px solid #e0e0e0;
-        }
-        .form-control:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.15);
-        }
-        .btn-primary {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            border: none;
-            padding: 12px;
-            border-radius: 10px;
-            font-weight: 600;
-        }
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+            color: #667eea;
+            margin-bottom: 15px;
         }
         .step {
             display: none;
@@ -66,22 +40,51 @@
         .step.active {
             display: block;
         }
-        .step-indicator {
+        .progress-dots {
             display: flex;
             justify-content: center;
             gap: 10px;
             margin-bottom: 25px;
         }
-        .step-dot {
+        .dot {
             width: 12px;
             height: 12px;
             border-radius: 50%;
-            background: #e0e0e0;
-            transition: all 0.3s;
+            background: #ddd;
         }
-        .step-dot.active {
-            background: var(--primary);
-            transform: scale(1.2);
+        .dot.active {
+            background: #667eea;
+        }
+        .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+        }
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #5a6fd6 0%, #6a4190 100%);
+        }
+        /* Loading spinner */
+        .spinner {
+            display: none;
+        }
+        .loading .spinner {
+            display: inline-block;
+        }
+        .loading .btn-text {
+            display: none;
+        }
+        /* Auto-login message */
+        .auto-login-message {
+            text-align: center;
+            padding: 20px;
+        }
+        .auto-login-message .spinner-border {
+            width: 3rem;
+            height: 3rem;
+            color: #667eea;
         }
     </style>
 </head>
@@ -90,88 +93,189 @@
         <div class="login-card">
             <div class="login-header">
                 <i class="fas fa-mobile-alt"></i>
-                <h3 class="mt-3">Recargas Tigo</h3>
+                <h4>Sistema de Recargas</h4>
                 <p class="text-muted">Ingresa con tu cuenta de Telegram</p>
             </div>
 
-            <div class="step-indicator">
-                <div class="step-dot active" id="dot1"></div>
-                <div class="step-dot" id="dot2"></div>
+            <!-- Auto-login loading -->
+            <div id="autoLoginLoading" class="auto-login-message" style="display: none;">
+                <div class="spinner-border mb-3" role="status">
+                    <span class="visually-hidden">Cargando...</span>
+                </div>
+                <h5>Iniciando sesión automáticamente...</h5>
+                <p class="text-muted">Por favor espera un momento</p>
             </div>
 
-            <!-- Step 1: Telegram ID -->
-            <div class="step active" id="step1">
-                <div class="mb-3">
-                    <label class="form-label">Tu ID de Telegram</label>
-                    <input type="number" class="form-control" id="telegramId" 
-                           placeholder="Ej: 123456789">
-                    <small class="text-muted">
-                        Usa @userinfobot en Telegram para obtenerlo
-                    </small>
+            <div id="loginForm">
+                <div class="progress-dots">
+                    <div class="dot active" id="dot1"></div>
+                    <div class="dot" id="dot2"></div>
                 </div>
-                <div id="error1" class="alert alert-danger" style="display:none;"></div>
-                <button class="btn btn-primary w-100" onclick="goToStep2()">
-                    <i class="fas fa-arrow-right me-2"></i>Continuar
-                </button>
-            </div>
 
-            <!-- Step 2: OTP -->
-            <div class="step" id="step2">
-                <div class="mb-3">
-                    <label class="form-label">Código OTP</label>
-                    <input type="text" class="form-control text-center" id="otpCode" 
-                           placeholder="000000" maxlength="6" style="font-size: 24px; letter-spacing: 5px;">
-                    <small class="text-muted">
-                        Solicita el código al bot de Telegram
-                    </small>
+                <!-- Step 1: Telegram ID -->
+                <div class="step active" id="step1">
+                    <div class="mb-3">
+                        <label class="form-label">Telegram ID</label>
+                        <input type="text" class="form-control text-center" id="telegramId" 
+                               placeholder="123456789" style="font-size: 18px;">
+                        <small class="text-muted">
+                            <i class="fab fa-telegram me-1"></i>Usa /myid en el bot para obtenerlo
+                        </small>
+                    </div>
+                    <div id="error1" class="alert alert-danger" style="display:none;"></div>
+                    <button class="btn btn-primary w-100" onclick="goToStep2()">
+                        <i class="fas fa-arrow-right me-2"></i>Continuar
+                    </button>
                 </div>
-                <div class="form-check mb-3">
-                    <input class="form-check-input" type="checkbox" id="rememberMe">
-                    <label class="form-check-label" for="rememberMe">
-                        Mantener sesión (21 días)
-                    </label>
+
+                <!-- Step 2: OTP -->
+                <div class="step" id="step2">
+                    <div class="mb-3">
+                        <label class="form-label">Código OTP</label>
+                        <input type="text" class="form-control text-center" id="otpCode" 
+                               placeholder="000000" maxlength="6" style="font-size: 24px; letter-spacing: 5px;">
+                        <small class="text-muted">
+                            <i class="fab fa-telegram me-1"></i>Usa /otp en el bot para obtener el código
+                        </small>
+                    </div>
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="rememberMe">
+                        <label class="form-check-label" for="rememberMe">
+                            Mantener sesión (21 días)
+                        </label>
+                    </div>
+                    <div id="error2" class="alert alert-danger" style="display:none;"></div>
+                    <button class="btn btn-primary w-100 mb-2" onclick="login()" id="loginBtn">
+                        <span class="btn-text"><i class="fas fa-sign-in-alt me-2"></i>Ingresar</span>
+                        <span class="spinner spinner-border spinner-border-sm" role="status"></span>
+                    </button>
+                    <button class="btn btn-outline-secondary w-100" onclick="goToStep1()">
+                        <i class="fas fa-arrow-left me-2"></i>Volver
+                    </button>
                 </div>
-                <div id="error2" class="alert alert-danger" style="display:none;"></div>
-                <button class="btn btn-primary w-100 mb-2" onclick="login()" id="loginBtn">
-                    <i class="fas fa-sign-in-alt me-2"></i>Ingresar
-                </button>
-                <button class="btn btn-outline-secondary w-100" onclick="goToStep1()">
-                    <i class="fas fa-arrow-left me-2"></i>Volver
-                </button>
             </div>
         </div>
         
         <div class="text-center mt-3 text-white">
-            <small>Sistema de Recargas Tigo v2.2</small>
+            <small>Sistema de Recargas Tigo v2.3</small>
         </div>
     </div>
 
     <script>
         let telegramId = '';
 
-        // Verificar sesión existente
+        // Verificar sesión existente o parámetros de URL
         window.onload = function() {
+            // Primero verificar si hay token existente válido
             const token = localStorage.getItem('token');
             const isAdmin = localStorage.getItem('isAdmin') === 'true';
             const isReseller = localStorage.getItem('isReseller') === 'true';
             
             if (token) {
-                if (isAdmin) {
-                    window.location.href = '/admin';
-                } else if (isReseller) {
-                    window.location.href = '/reseller';
-                } else {
-                    window.location.href = '/user';
-                }
+                // Verificar si el token sigue válido
+                verifyExistingToken(token, isAdmin, isReseller);
+                return;
+            }
+            
+            // Luego verificar parámetros de URL para login directo
+            const urlParams = new URLSearchParams(window.location.search);
+            const tid = urlParams.get('tid');
+            const otp = urlParams.get('otp');
+            
+            if (tid && otp) {
+                // Login directo desde enlace del bot
+                autoLogin(tid, otp);
             }
         };
+
+        async function verifyExistingToken(token, isAdmin, isReseller) {
+            try {
+                const resp = await fetch('/api/user/info', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                
+                if (resp.ok) {
+                    // Token válido, redirigir
+                    redirectToPanel(isAdmin, isReseller);
+                } else {
+                    // Token inválido, limpiar y mostrar login
+                    localStorage.clear();
+                }
+            } catch (e) {
+                console.error('Error verificando token:', e);
+                localStorage.clear();
+            }
+        }
+
+        async function autoLogin(tid, otp) {
+            // Mostrar loading de auto-login
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('autoLoginLoading').style.display = 'block';
+            
+            try {
+                const resp = await fetch('/api/auth/verify-otp', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        telegram_id: tid,
+                        otp_code: otp,
+                        remember: true  // Auto-login siempre recuerda
+                    })
+                });
+                
+                const data = await resp.json();
+                
+                if (data.success) {
+                    // Guardar datos de sesión
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('isAdmin', data.is_admin);
+                    localStorage.setItem('isReseller', data.is_reseller);
+                    localStorage.setItem('telegramId', data.telegram_id);
+                    
+                    // Limpiar URL para que no se pueda reutilizar el enlace
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                    
+                    // Redirigir según rol
+                    redirectToPanel(data.is_admin, data.is_reseller);
+                } else {
+                    // Error en auto-login, mostrar formulario normal con error
+                    showLoginFormWithError('Enlace expirado o inválido. Por favor ingresa manualmente.');
+                }
+            } catch (e) {
+                console.error('Error en auto-login:', e);
+                showLoginFormWithError('Error de conexión. Por favor ingresa manualmente.');
+            }
+        }
+
+        function showLoginFormWithError(message) {
+            document.getElementById('autoLoginLoading').style.display = 'none';
+            document.getElementById('loginForm').style.display = 'block';
+            
+            // Limpiar URL
+            window.history.replaceState({}, document.title, window.location.pathname);
+            
+            // Mostrar error en step 1
+            const error = document.getElementById('error1');
+            error.textContent = message;
+            error.style.display = 'block';
+        }
+
+        function redirectToPanel(isAdmin, isReseller) {
+            if (isAdmin) {
+                window.location.href = '/admin';
+            } else if (isReseller) {
+                window.location.href = '/reseller';
+            } else {
+                window.location.href = '/user';
+            }
+        }
 
         function goToStep2() {
             const tid = document.getElementById('telegramId').value.trim();
             const error = document.getElementById('error1');
 
             if (!tid || !/^\d+$/.test(tid)) {
-                error.textContent = 'Ingresa un Telegram ID válido';
+                error.textContent = 'Ingresa un Telegram ID válido (solo números)';
                 error.style.display = 'block';
                 return;
             }
@@ -192,6 +296,9 @@
             document.getElementById('step1').classList.add('active');
             document.getElementById('dot2').classList.remove('active');
             document.getElementById('dot1').classList.add('active');
+            
+            // Limpiar errores
+            document.getElementById('error2').style.display = 'none';
         }
 
         async function login() {
@@ -207,8 +314,8 @@
             }
 
             error.style.display = 'none';
+            btn.classList.add('loading');
             btn.disabled = true;
-            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Verificando...';
 
             try {
                 const resp = await fetch('/api/auth/verify-otp', {
@@ -225,32 +332,36 @@
 
                 if (data.success) {
                     localStorage.setItem('token', data.token);
-                    localStorage.setItem('telegramId', telegramId);
                     localStorage.setItem('isAdmin', data.is_admin);
-                    localStorage.setItem('isReseller', data.is_reseller || false);
-                    window.location.href = data.redirect;
+                    localStorage.setItem('isReseller', data.is_reseller);
+                    localStorage.setItem('telegramId', data.telegram_id);
+                    
+                    redirectToPanel(data.is_admin, data.is_reseller);
                 } else {
-                    error.textContent = data.error || 'Error de verificación';
+                    error.textContent = data.error || 'Código incorrecto o expirado';
                     error.style.display = 'block';
                 }
             } catch (e) {
-                error.textContent = 'Error de conexión';
+                error.textContent = 'Error de conexión. Intenta nuevamente.';
                 error.style.display = 'block';
             } finally {
+                btn.classList.remove('loading');
                 btn.disabled = false;
-                btn.innerHTML = '<i class="fas fa-sign-in-alt me-2"></i>Ingresar';
             }
         }
 
-        // Enter key
-        document.getElementById('telegramId').addEventListener('keypress', e => {
+        // Enter key para enviar
+        document.getElementById('telegramId').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') goToStep2();
         });
-        document.getElementById('otpCode').addEventListener('keypress', e => {
+        
+        document.getElementById('otpCode').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') login();
         });
-        document.getElementById('otpCode').addEventListener('input', function() {
-            this.value = this.value.replace(/\D/g, '');
+
+        // Auto-formatear OTP (solo números)
+        document.getElementById('otpCode').addEventListener('input', function(e) {
+            this.value = this.value.replace(/[^0-9]/g, '');
         });
     </script>
 </body>

@@ -3,71 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel Usuario - Recargas Tigo</title>
+    <title>Usuario - Sistema de Recargas Tigo</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        :root {
-            --primary: #667eea;
-            --secondary: #764ba2;
-        }
-        body { background: #f5f7fa; font-family: 'Segoe UI', system-ui, sans-serif; }
-        .navbar { background: linear-gradient(135deg, var(--primary), var(--secondary)); }
-        .balance-card {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            color: white;
-            border-radius: 15px;
-            padding: 25px;
-        }
-        .balance-card h1 { font-size: 2.5rem; font-weight: 700; }
-        .card {
-            border: none;
-            border-radius: 15px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-        }
-        .category-header {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            color: white;
-            padding: 10px 15px;
-            border-radius: 10px;
-            margin-bottom: 10px;
-            cursor: pointer;
-        }
-        .category-header:hover { opacity: 0.9; }
-        .category-header .icon { font-size: 20px; margin-right: 10px; }
-        .package-item {
-            border: 2px solid #e9ecef;
-            border-radius: 12px;
-            padding: 15px;
-            margin-bottom: 10px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .package-item:hover { border-color: var(--primary); background: #f8f9ff; }
-        .package-item.selected { border-color: var(--primary); background: #e7eaff; }
-        .nav-pills .nav-link.active { background: var(--primary); }
-        .btn-primary {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            border: none;
-        }
-        .loading { display: none; }
-        .loading.show { display: block; }
-        .modification-item {
-            border-left: 4px solid #667eea;
-            padding: 10px 15px;
-            margin-bottom: 10px;
-            background: #f8f9fa;
-            border-radius: 0 8px 8px 0;
-        }
-        .modification-item .icon { font-size: 18px; margin-right: 8px; }
+        body { background: #f5f5f5; }
+        .navbar { background: linear-gradient(135deg, #28a745 0%, #20c997 100%); }
+        .card { border: none; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .balance-card { background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; }
+        .package-card { cursor: pointer; transition: all 0.2s; border: 2px solid transparent; }
+        .package-card:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.15); }
+        .package-card.selected { border-color: #28a745; background: #e8f5e9; }
+        .nav-pills .nav-link.active { background: linear-gradient(135deg, #28a745 0%, #20c997 100%); }
+        .btn-primary { background: linear-gradient(135deg, #28a745 0%, #20c997 100%); border: none; }
+        .btn-success { background: linear-gradient(135deg, #28a745 0%, #20c997 100%); border: none; }
+        .category-header { padding: 10px 15px; margin: 15px 0 10px; background: #f8f9fa; border-radius: 10px; }
+        .key-input-group { position: relative; }
+        .key-copy-btn { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); }
+        .key-linked { background: #d4edda !important; border-color: #28a745 !important; }
     </style>
 </head>
 <body>
-    <nav class="navbar navbar-dark">
+    <nav class="navbar navbar-dark mb-4">
         <div class="container-fluid">
-            <span class="navbar-brand"><i class="fas fa-mobile-alt me-2"></i>Recargas Tigo</span>
+            <span class="navbar-brand">
+                <i class="fas fa-mobile-alt me-2"></i>Recargas Tigo
+            </span>
             <div class="d-flex align-items-center">
-                <span class="text-white me-3" id="userInfo"></span>
+                <span id="userInfo" class="text-white me-3"></span>
                 <button class="btn btn-outline-light btn-sm" onclick="logout()">
                     <i class="fas fa-sign-out-alt"></i>
                 </button>
@@ -75,23 +38,33 @@
         </div>
     </nav>
 
-    <div class="container mt-4">
-        <!-- Balance -->
-        <div class="balance-card mb-4">
-            <small style="opacity: 0.9;">Saldo Disponible</small>
-            <h1 id="balance">Gs. 0</h1>
-            <small id="keyInfo" style="opacity: 0.8;"></small>
-        </div>
-
-        <!-- API Key Input -->
-        <div class="card mb-4" id="keyInputCard">
+    <div class="container">
+        <!-- Balance Card -->
+        <div class="card balance-card mb-4">
             <div class="card-body">
-                <h5><i class="fas fa-key me-2"></i>Tu Clave de API</h5>
-                <div class="input-group">
-                    <input type="text" class="form-control" id="apiKey" placeholder="Ingresa tu clave de API">
-                    <button class="btn btn-primary" onclick="loadBalance()">Cargar</button>
+                <div class="row align-items-center">
+                    <div class="col-md-4">
+                        <small>Tu Saldo Disponible</small>
+                        <h2 id="balance">-</h2>
+                        <small id="keyInfo"></small>
+                    </div>
+                    <div class="col-md-8">
+                        <div class="key-input-group">
+                            <label class="form-label text-white">Tu Clave de API</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="apiKey" placeholder="TG-XXXX-XXXX-XXXX"
+                                       style="font-family: monospace;">
+                                <button class="btn btn-light" type="button" onclick="copyApiKey()" title="Copiar clave">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                                <button class="btn btn-light" onclick="loadBalance()">
+                                    <i class="fas fa-sync-alt"></i> Verificar
+                                </button>
+                            </div>
+                            <small id="keyLinkStatus" class="text-white-50"></small>
+                        </div>
+                    </div>
                 </div>
-                <small class="text-muted">Ingresa la clave que te proporcionó el administrador</small>
             </div>
         </div>
 
@@ -99,7 +72,7 @@
         <ul class="nav nav-pills mb-4" role="tablist">
             <li class="nav-item">
                 <a class="nav-link active" data-bs-toggle="tab" href="#recharge">
-                    <i class="fas fa-mobile-alt me-1"></i>Recargar
+                    <i class="fas fa-bolt me-1"></i>Recargar
                 </a>
             </li>
             <li class="nav-item">
@@ -117,36 +90,36 @@
         <div class="tab-content">
             <!-- Tab Recargar -->
             <div class="tab-pane fade show active" id="recharge">
-                <div class="card mb-4">
+                <div class="card">
                     <div class="card-body">
-                        <h5><i class="fas fa-phone me-2"></i>Número de Destino</h5>
-                        <div class="input-group">
-                            <input type="tel" class="form-control" id="destination" 
-                                   placeholder="0981234567" maxlength="10">
-                            <button class="btn btn-primary" onclick="loadPackages()">
-                                <i class="fas fa-search me-1"></i>Buscar
-                            </button>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label class="form-label">Número de Destino</label>
+                                <div class="input-group mb-3">
+                                    <input type="text" class="form-control" id="destination" 
+                                           placeholder="09XXXXXXXX" maxlength="10">
+                                    <button class="btn btn-primary" onclick="loadPackages()">
+                                        <i class="fas fa-search"></i> Buscar
+                                    </button>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                </div>
-
-                <!-- Paquetes por Categorías -->
-                <div class="card" id="packagesCard" style="display:none;">
-                    <div class="card-body">
-                        <h5><i class="fas fa-box me-2"></i>Selecciona un Paquete</h5>
                         
-                        <div class="loading text-center py-4" id="packagesLoading">
-                            <div class="spinner-border text-primary"></div>
+                        <div id="packagesLoading" class="text-center py-4" style="display: none;">
+                            <div class="spinner-border text-primary" role="status"></div>
                             <p class="mt-2">Cargando paquetes...</p>
                         </div>
-
-                        <div id="packagesList"></div>
+                        
+                        <div id="packagesContainer" style="display: none;">
+                            <h5 class="mb-3">Selecciona un paquete:</h5>
+                            <div id="packagesList"></div>
+                        </div>
+                        
                         <div id="packagesError" class="alert alert-danger" style="display:none;"></div>
                     </div>
                 </div>
 
-                <!-- Confirmar -->
-                <div class="card mt-4" id="confirmCard" style="display:none;">
+                <div class="card" id="confirmCard" style="display:none;">
                     <div class="card-body">
                         <h5><i class="fas fa-check-circle me-2"></i>Confirmar Recarga</h5>
                         <div id="confirmDetails" class="alert alert-info"></div>
@@ -189,7 +162,23 @@
                     <i class="fas fa-check-circle text-success" style="font-size: 80px;"></i>
                     <h3 class="mt-3">¡Recarga Exitosa!</h3>
                     <div id="successDetails"></div>
-                    <button class="btn btn-primary mt-3" data-bs-dismiss="modal">Entendido</button>
+                    <button class="btn btn-primary mt-3" data-bs-dismiss="modal" onclick="resetRecharge()">Entendido</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Error -->
+    <div class="modal fade" id="errorModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-body text-center p-5" style="background: #fff3cd;">
+                    <i class="fas fa-exclamation-triangle text-warning" style="font-size: 80px;"></i>
+                    <h3 class="mt-3">Recarga Fallida</h3>
+                    <div id="errorDetails" class="mt-3 alert alert-danger"></div>
+                    <button class="btn btn-warning mt-3" data-bs-dismiss="modal" onclick="resetRechargeKeepLine()">
+                        <i class="fas fa-redo me-1"></i>Intentar de Nuevo
+                    </button>
                 </div>
             </div>
         </div>
@@ -207,6 +196,8 @@
         let allPackages = [];
         let selectedPackage = null;
         let currentBalance = 0;
+        let isKeyLinked = false;
+        let currentDestination = '';
 
         const headers = {
             'Authorization': 'Bearer ' + token,
@@ -220,6 +211,9 @@
             loadBalance();
         }
 
+        // ============================================================
+        // FUNCIONES DE BALANCE Y CLAVE
+        // ============================================================
         async function loadBalance() {
             apiKey = document.getElementById('apiKey').value.trim();
             if (!apiKey) {
@@ -239,160 +233,198 @@
                     document.getElementById('keyInfo').textContent = 
                         `Válida hasta: ${new Date(data.key_info.expires).toLocaleDateString()} | ` +
                         `Rol: ${data.key_info.role || 'Usuario'}`;
+                    
+                    // Verificar si la clave está vinculada al Telegram actual
+                    const linkedTid = data.key_info.telegram_id;
+                    if (linkedTid) {
+                        if (linkedTid == telegramId) {
+                            isKeyLinked = true;
+                            document.getElementById('apiKey').classList.add('key-linked');
+                            document.getElementById('apiKey').readOnly = true;
+                            document.getElementById('keyLinkStatus').innerHTML = 
+                                '<i class="fas fa-check-circle"></i> Clave vinculada a tu cuenta';
+                        } else {
+                            // Clave vinculada a otro usuario
+                            document.getElementById('balance').textContent = 'Clave en uso';
+                            document.getElementById('keyLinkStatus').innerHTML = 
+                                '<i class="fas fa-exclamation-circle"></i> Esta clave está vinculada a otro usuario';
+                            return;
+                        }
+                    } else {
+                        // Clave no vinculada - se vinculará automáticamente al usarla
+                        document.getElementById('keyLinkStatus').innerHTML = 
+                            '<i class="fas fa-info-circle"></i> La clave se vinculará a tu cuenta al usarla';
+                    }
+                    
                     loadHistory();
                 } else {
                     document.getElementById('balance').textContent = 'Clave inválida';
                     document.getElementById('keyInfo').textContent = data.error || '';
+                    document.getElementById('keyLinkStatus').innerHTML = '';
                 }
             } catch (e) {
                 console.error(e);
+                document.getElementById('balance').textContent = 'Error de conexión';
             }
         }
 
+        function copyApiKey() {
+            const keyInput = document.getElementById('apiKey');
+            const key = keyInput.value.trim();
+            
+            if (!key) {
+                alert('No hay clave para copiar');
+                return;
+            }
+            
+            navigator.clipboard.writeText(key).then(() => {
+                // Feedback visual
+                const toast = document.createElement('div');
+                toast.className = 'position-fixed bottom-0 end-0 p-3';
+                toast.innerHTML = `
+                    <div class="toast show" role="alert">
+                        <div class="toast-body bg-success text-white rounded">
+                            <i class="fas fa-check me-1"></i> Clave copiada al portapapeles
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(toast);
+                setTimeout(() => toast.remove(), 2000);
+            }).catch(() => {
+                // Fallback para navegadores antiguos
+                keyInput.select();
+                document.execCommand('copy');
+                alert('Clave copiada');
+            });
+        }
+
+        // ============================================================
+        // FUNCIONES DE PAQUETES
+        // ============================================================
         async function loadPackages() {
             const dest = document.getElementById('destination').value.trim();
             if (!/^\d{10}$/.test(dest)) {
-                alert('Número inválido. Debe tener 10 dígitos');
+                alert('Número inválido. Debe tener 10 dígitos.');
                 return;
             }
 
-            document.getElementById('packagesCard').style.display = 'block';
-            document.getElementById('packagesLoading').classList.add('show');
-            document.getElementById('packagesList').innerHTML = '';
+            if (!apiKey) {
+                alert('Primero ingresa tu clave de API');
+                return;
+            }
+
+            currentDestination = dest;
+            document.getElementById('packagesLoading').style.display = 'block';
+            document.getElementById('packagesContainer').style.display = 'none';
             document.getElementById('packagesError').style.display = 'none';
             document.getElementById('confirmCard').style.display = 'none';
 
             try {
                 const resp = await fetch('/api/packages', {
                     method: 'POST',
-                    headers,
+                    headers: {
+                        ...headers,
+                        'X-API-Key': apiKey
+                    },
                     body: JSON.stringify({ destination: dest, api_key: apiKey })
                 });
                 const data = await resp.json();
 
+                document.getElementById('packagesLoading').style.display = 'none';
+
                 if (data.success) {
                     allPackages = data.packages || [];
                     packagesByCategory = data.by_category || {};
-                    renderPackagesByCategory();
+                    renderPackages();
+                    document.getElementById('packagesContainer').style.display = 'block';
                 } else {
-                    document.getElementById('packagesError').textContent = data.error || 'Error';
+                    document.getElementById('packagesError').textContent = data.error;
                     document.getElementById('packagesError').style.display = 'block';
                 }
             } catch (e) {
+                document.getElementById('packagesLoading').style.display = 'none';
                 document.getElementById('packagesError').textContent = 'Error de conexión';
                 document.getElementById('packagesError').style.display = 'block';
-            } finally {
-                document.getElementById('packagesLoading').classList.remove('show');
             }
         }
 
-        function renderPackagesByCategory() {
+        function renderPackages() {
             const container = document.getElementById('packagesList');
-            container.innerHTML = '';
+            let html = '';
 
-            if (Object.keys(packagesByCategory).length === 0) {
-                container.innerHTML = '<p class="text-muted">No hay paquetes disponibles</p>';
-                return;
+            for (const [catKey, catData] of Object.entries(packagesByCategory)) {
+                if (catData.packages && catData.packages.length > 0) {
+                    html += `<div class="category-header"><strong>${catData.icon || '📦'} ${catData.name}</strong> (${catData.count})</div>`;
+                    html += '<div class="row">';
+                    for (const pkg of catData.packages) {
+                        const canAfford = pkg.amount <= currentBalance;
+                        html += `
+                            <div class="col-md-4 mb-2">
+                                <div class="card package-card p-2 ${!canAfford ? 'opacity-50' : ''}" 
+                                     onclick="${canAfford ? `selectPackage('${pkg.id}')` : ''}" 
+                                     data-pkg-id="${pkg.id}"
+                                     style="${!canAfford ? 'cursor: not-allowed;' : ''}">
+                                    <div class="d-flex justify-content-between">
+                                        <strong>${pkg.name}</strong>
+                                        <span class="badge ${canAfford ? 'bg-success' : 'bg-secondary'}">
+                                            Gs. ${pkg.amount?.toLocaleString()}
+                                        </span>
+                                    </div>
+                                    <small class="text-muted">${pkg.description || ''}</small>
+                                    <small class="text-info">${pkg.validity || ''}</small>
+                                    ${!canAfford ? '<small class="text-danger">Saldo insuficiente</small>' : ''}
+                                </div>
+                            </div>
+                        `;
+                    }
+                    html += '</div>';
+                }
             }
 
-            // Ordenar categorías
-            const categoryOrder = ['INTERNET_Y_LLAMADAS', 'ILIMITADOS', 'VOZ', 'OTROS'];
-            
-            for (const catKey of categoryOrder) {
-                const cat = packagesByCategory[catKey];
-                if (!cat || cat.packages.length === 0) continue;
-
-                // Header de categoría
-                const catDiv = document.createElement('div');
-                catDiv.className = 'mb-3';
-                catDiv.innerHTML = `
-                    <div class="category-header" onclick="toggleCategory('${catKey}')">
-                        <span class="icon">${cat.icon}</span>
-                        <strong>${cat.name}</strong>
-                        <span class="float-end">
-                            ${cat.count} paquetes
-                            <i class="fas fa-chevron-down ms-2" id="chevron-${catKey}"></i>
-                        </span>
-                    </div>
-                    <div class="category-packages" id="packages-${catKey}">
-                        ${cat.packages.map((pkg, i) => renderPackageItem(pkg, catKey + '-' + i)).join('')}
-                    </div>
-                `;
-                container.appendChild(catDiv);
-            }
-        }
-
-        function renderPackageItem(pkg, index) {
-            const affordable = pkg.amount <= currentBalance;
-            return `
-                <div class="package-item ${affordable ? '' : 'opacity-50'}" 
-                     onclick="${affordable ? `selectPackage('${pkg.id}')` : ''}"
-                     id="pkg-${pkg.id}">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <strong>${pkg.name}</strong>
-                            ${pkg.description ? '<br><small class="text-muted">' + pkg.description + '</small>' : ''}
-                        </div>
-                        <div class="text-end">
-                            <strong class="text-primary">Gs. ${pkg.amount.toLocaleString()}</strong>
-                            ${!affordable ? '<br><small class="text-danger">Saldo insuficiente</small>' : ''}
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-
-        function toggleCategory(catKey) {
-            const packagesDiv = document.getElementById('packages-' + catKey);
-            const chevron = document.getElementById('chevron-' + catKey);
-            
-            if (packagesDiv.style.display === 'none') {
-                packagesDiv.style.display = 'block';
-                chevron.classList.remove('fa-chevron-right');
-                chevron.classList.add('fa-chevron-down');
-            } else {
-                packagesDiv.style.display = 'none';
-                chevron.classList.remove('fa-chevron-down');
-                chevron.classList.add('fa-chevron-right');
-            }
+            container.innerHTML = html || '<p class="text-muted">No hay paquetes disponibles</p>';
         }
 
         function selectPackage(pkgId) {
-            // Quitar selección anterior
-            document.querySelectorAll('.package-item').forEach(el => el.classList.remove('selected'));
+            document.querySelectorAll('.package-card').forEach(el => el.classList.remove('selected'));
+            document.querySelector(`[data-pkg-id="${pkgId}"]`)?.classList.add('selected');
             
-            // Buscar paquete
             selectedPackage = allPackages.find(p => p.id === pkgId);
-            if (!selectedPackage) return;
-
-            // Marcar seleccionado
-            document.getElementById('pkg-' + pkgId).classList.add('selected');
-
-            // Mostrar confirmación
-            const dest = document.getElementById('destination').value;
-            document.getElementById('confirmDetails').innerHTML = `
-                <strong>Destino:</strong> ${dest}<br>
-                <strong>Paquete:</strong> ${selectedPackage.name}<br>
-                <strong>Monto:</strong> Gs. ${selectedPackage.amount.toLocaleString()}<br>
-                <strong>Saldo después:</strong> Gs. ${(currentBalance - selectedPackage.amount).toLocaleString()}
-            `;
-            document.getElementById('confirmCard').style.display = 'block';
-            document.getElementById('rechargeResult').innerHTML = '';
+            
+            if (selectedPackage) {
+                const remaining = currentBalance - selectedPackage.amount;
+                document.getElementById('confirmDetails').innerHTML = `
+                    <strong>Destino:</strong> ${currentDestination}<br>
+                    <strong>Paquete:</strong> ${selectedPackage.name}<br>
+                    <strong>Monto:</strong> Gs. ${selectedPackage.amount?.toLocaleString()}<br>
+                    <strong>Tu saldo actual:</strong> Gs. ${currentBalance.toLocaleString()}<br>
+                    <strong>Saldo después:</strong> Gs. ${remaining.toLocaleString()}
+                `;
+                document.getElementById('confirmCard').style.display = 'block';
+            }
         }
 
+        // ============================================================
+        // FUNCIONES DE RECARGA
+        // ============================================================
         async function doRecharge() {
-            if (!selectedPackage) return;
+            if (!selectedPackage || !currentDestination) {
+                alert('Selecciona un paquete');
+                return;
+            }
 
             const btn = document.getElementById('rechargeBtn');
             btn.disabled = true;
-            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Procesando...';
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Procesando...';
 
             try {
                 const resp = await fetch('/api/recharge', {
                     method: 'POST',
-                    headers,
+                    headers: {
+                        ...headers,
+                        'X-API-Key': apiKey
+                    },
                     body: JSON.stringify({
-                        destination: document.getElementById('destination').value,
+                        destination: currentDestination,
                         package_id: selectedPackage.id,
                         api_key: apiKey
                     })
@@ -401,91 +433,109 @@
 
                 if (data.success) {
                     document.getElementById('successDetails').innerHTML = `
-                        <p class="mt-3">
-                            <strong>${selectedPackage.name}</strong><br>
-                            Monto: Gs. ${selectedPackage.amount.toLocaleString()}<br>
-                            Saldo restante: Gs. ${data.data.remaining_balance.toLocaleString()}
-                        </p>
+                        <p><strong>Destino:</strong> ${currentDestination}</p>
+                        <p><strong>Paquete:</strong> ${selectedPackage.name}</p>
+                        <p><strong>Monto:</strong> Gs. ${selectedPackage.amount?.toLocaleString()}</p>
+                        <p><strong>Saldo restante:</strong> Gs. ${data.data?.remaining_balance?.toLocaleString() || '-'}</p>
                     `;
                     new bootstrap.Modal(document.getElementById('successModal')).show();
-                    
-                    currentBalance = data.data.remaining_balance;
-                    document.getElementById('balance').textContent = 'Gs. ' + currentBalance.toLocaleString();
-                    
-                    document.getElementById('confirmCard').style.display = 'none';
-                    selectedPackage = null;
+                    loadBalance();
                     loadHistory();
                 } else {
-                    document.getElementById('rechargeResult').innerHTML = 
-                        `<div class="alert alert-danger">${data.error}</div>`;
+                    // Mostrar modal de error
+                    document.getElementById('errorDetails').innerHTML = `
+                        <p><strong>Error:</strong> ${data.error || 'Error desconocido'}</p>
+                        <p><strong>Destino:</strong> ${currentDestination}</p>
+                        <p><strong>Paquete:</strong> ${selectedPackage.name}</p>
+                    `;
+                    new bootstrap.Modal(document.getElementById('errorModal')).show();
+                    loadHistory();
                 }
             } catch (e) {
-                document.getElementById('rechargeResult').innerHTML = 
-                    '<div class="alert alert-danger">Error de conexión</div>';
+                document.getElementById('errorDetails').innerHTML = `
+                    <p><strong>Error:</strong> Error de conexión</p>
+                    <p>Por favor verifica tu conexión e intenta de nuevo.</p>
+                `;
+                new bootstrap.Modal(document.getElementById('errorModal')).show();
             } finally {
                 btn.disabled = false;
                 btn.innerHTML = '<i class="fas fa-check me-2"></i>Confirmar Recarga';
             }
         }
 
+        function resetRecharge() {
+            document.getElementById('destination').value = '';
+            document.getElementById('packagesContainer').style.display = 'none';
+            document.getElementById('confirmCard').style.display = 'none';
+            selectedPackage = null;
+            currentDestination = '';
+        }
+
+        function resetRechargeKeepLine() {
+            // Mantiene la línea y recarga historial
+            document.getElementById('confirmCard').style.display = 'none';
+            selectedPackage = null;
+            loadHistory();
+        }
+
+        // ============================================================
+        // FUNCIONES DE HISTORIAL
+        // ============================================================
         async function loadHistory() {
+            if (!apiKey) return;
+
             try {
                 const resp = await fetch('/api/history?api_key=' + encodeURIComponent(apiKey), { headers });
                 const data = await resp.json();
 
-                // Historial de recargas
-                const historyContainer = document.getElementById('historyList');
-                if (data.success && data.recharges && data.recharges.length > 0) {
-                    historyContainer.innerHTML = data.recharges.map(h => `
-                        <div class="d-flex justify-content-between align-items-center border-bottom py-2">
-                            <div>
-                                <strong>${h.destination}</strong>
-                                <span class="ms-2 badge ${h.status === 'SUCCESS' ? 'bg-success' : 'bg-danger'}">
-                                    ${h.status === 'SUCCESS' ? '✓' : '✗'} Gs. ${(h.amount || 0).toLocaleString()}
-                                </span>
-                            </div>
-                            <small class="text-muted">${h.package_name || ''} - ${new Date(h.timestamp).toLocaleString()}</small>
-                        </div>
-                    `).join('');
-                } else {
-                    historyContainer.innerHTML = '<p class="text-muted">No hay historial de recargas</p>';
-                }
-
-                // Historial de modificaciones
-                const modsContainer = document.getElementById('modificationsList');
-                if (data.modifications && data.modifications.length > 0) {
-                    modsContainer.innerHTML = data.modifications.map(m => {
-                        const preset = m.preset_info || {};
-                        const borderColor = preset.color || '#667eea';
-                        const icon = preset.icon || '📋';
-                        const noteText = preset.text || m.type;
-                        
-                        let details = '';
-                        if (m.details) {
-                            if (m.details.max_amount) {
-                                details += `<br><small>Saldo: Gs. ${m.details.max_amount.old?.toLocaleString() || '?'} → Gs. ${m.details.max_amount.new?.toLocaleString() || '?'}</small>`;
-                            }
-                            if (m.details.expires) {
-                                details += `<br><small>Validez actualizada</small>`;
-                            }
-                        }
-                        
-                        return `
-                            <div class="modification-item" style="border-left-color: ${borderColor}">
-                                <div class="d-flex justify-content-between">
-                                    <div>
-                                        <span class="icon">${icon}</span>
-                                        <strong>${noteText}</strong>
-                                        ${details}
-                                        ${m.admin_note ? `<br><small class="text-muted">"${m.admin_note}"</small>` : ''}
+                if (data.success) {
+                    const historyContainer = document.getElementById('historyList');
+                    
+                    if (data.recharges && data.recharges.length > 0) {
+                        historyContainer.innerHTML = data.recharges.map(h => `
+                            <div class="card mb-2">
+                                <div class="card-body py-2">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <strong>${h.destination}</strong> - ${h.package_name}
+                                            <br><small class="text-muted">${new Date(h.timestamp).toLocaleString()}</small>
+                                        </div>
+                                        <div class="text-end">
+                                            <span class="badge ${h.status === 'SUCCESS' ? 'bg-success' : 'bg-danger'}">
+                                                ${h.status === 'SUCCESS' ? 'Exitosa' : 'Fallida'}
+                                            </span>
+                                            <br><small>Gs. ${h.amount?.toLocaleString()}</small>
+                                        </div>
                                     </div>
-                                    <small class="text-muted">${new Date(m.timestamp).toLocaleString()}</small>
+                                    ${h.error ? `<small class="text-danger">${h.error}</small>` : ''}
                                 </div>
                             </div>
-                        `;
-                    }).join('');
-                } else {
-                    modsContainer.innerHTML = '<p class="text-muted">No hay cambios registrados</p>';
+                        `).join('');
+                    } else {
+                        historyContainer.innerHTML = '<p class="text-muted">No hay recargas registradas</p>';
+                    }
+
+                    // Modificaciones
+                    const modsContainer = document.getElementById('modificationsList');
+                    if (data.modifications && data.modifications.length > 0) {
+                        modsContainer.innerHTML = data.modifications.map(m => {
+                            const preset = m.preset_info || {};
+                            return `
+                            <div class="card mb-2" style="border-left: 4px solid ${preset.color || '#6c757d'}">
+                                <div class="card-body py-2">
+                                    <div class="d-flex justify-content-between">
+                                        <span>
+                                            ${preset.icon || '📝'} <strong>${preset.text || m.type}</strong>
+                                            ${m.admin_note ? `<br><small class="text-muted">"${m.admin_note}"</small>` : ''}
+                                        </span>
+                                        <small class="text-muted">${new Date(m.timestamp).toLocaleString()}</small>
+                                    </div>
+                                </div>
+                            </div>
+                        `}).join('');
+                    } else {
+                        modsContainer.innerHTML = '<p class="text-muted">No hay cambios registrados</p>';
+                    }
                 }
             } catch (e) {
                 console.error(e);
@@ -498,7 +548,7 @@
             window.location.href = '/';
         }
 
-        // Enter key
+        // Enter key para buscar
         document.getElementById('destination').addEventListener('keypress', e => {
             if (e.key === 'Enter') loadPackages();
         });

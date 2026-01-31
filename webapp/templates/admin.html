@@ -3,77 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel Admin - Recargas Tigo</title>
+    <title>Admin - Sistema de Recargas Tigo</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        :root {
-            --primary: #667eea;
-            --secondary: #764ba2;
-        }
-        body { background: #f5f7fa; font-family: 'Segoe UI', system-ui, sans-serif; }
-        .navbar { background: linear-gradient(135deg, var(--primary), var(--secondary)); }
-        .stat-card {
-            border: none;
-            border-radius: 15px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-            transition: transform 0.2s;
-        }
-        .stat-card:hover { transform: translateY(-3px); }
-        .stat-card .icon {
-            width: 50px;
-            height: 50px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-        }
-        .card {
-            border: none;
-            border-radius: 15px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-        }
-        .btn-primary {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            border: none;
-        }
-        .status-badge {
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-        }
+        body { background: #f5f5f5; }
+        .navbar { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .card { border: none; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .status-badge { padding: 5px 15px; border-radius: 20px; font-size: 14px; }
         .status-ready { background: #d4edda; color: #155724; }
         .status-error { background: #f8d7da; color: #721c24; }
-        .status-partial { background: #fff3cd; color: #856404; }
-        .table th { border-top: none; }
-        .nav-pills .nav-link.active { background: var(--primary); }
-        .note-preset {
-            display: inline-block;
-            padding: 3px 8px;
-            border-radius: 12px;
-            font-size: 11px;
-            margin: 2px;
-            cursor: pointer;
-        }
-        .note-preset:hover { opacity: 0.8; }
-        .category-badge {
-            display: inline-block;
-            padding: 3px 8px;
-            border-radius: 8px;
-            font-size: 11px;
-        }
+        .table { margin-bottom: 0; }
+        .package-card { cursor: pointer; transition: all 0.2s; border: 2px solid transparent; }
+        .package-card:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.15); }
+        .package-card.selected { border-color: #667eea; background: #f0f3ff; }
+        .nav-pills .nav-link.active { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; }
+        .category-header { padding: 10px 15px; margin: 15px 0 10px; background: #f8f9fa; border-radius: 10px; }
+        /* Para mostrar claves completas */
+        .key-full { font-family: monospace; font-size: 12px; word-break: break-all; }
+        .key-copy-btn { cursor: pointer; padding: 2px 8px; font-size: 11px; }
+        /* Modal de error de recarga */
+        .error-modal-content { background: #fff3cd; }
     </style>
 </head>
 <body>
-    <nav class="navbar navbar-dark">
+    <nav class="navbar navbar-dark mb-4">
         <div class="container-fluid">
             <span class="navbar-brand">
-                <i class="fas fa-shield-alt me-2"></i>Panel Administrador
+                <i class="fas fa-shield-alt me-2"></i>Panel de Administración
             </span>
             <div class="d-flex align-items-center">
-                <span class="text-white me-3">👑 Admin</span>
+                <span id="systemStatus" class="status-badge status-ready me-3">Cargando...</span>
+                <span id="currentAccount" class="text-white me-3"></span>
                 <button class="btn btn-outline-light btn-sm" onclick="logout()">
                     <i class="fas fa-sign-out-alt"></i>
                 </button>
@@ -81,34 +43,13 @@
         </div>
     </nav>
 
-    <div class="container-fluid mt-4">
-        <!-- Estado del Sistema -->
-        <div class="card mb-4">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h5 class="mb-1"><i class="fas fa-server me-2"></i>Estado del Sistema</h5>
-                        <span id="systemStatus" class="status-badge status-ready">Cargando...</span>
-                        <span id="currentAccount" class="ms-2 text-muted"></span>
-                    </div>
-                    <div>
-                        <button class="btn btn-outline-primary btn-sm me-2" onclick="refreshAuth()">
-                            <i class="fas fa-sync me-1"></i>Refrescar
-                        </button>
-                        <button class="btn btn-outline-secondary btn-sm" onclick="switchAccount()">
-                            <i class="fas fa-exchange-alt me-1"></i>Cambiar Cuenta
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Stats -->
+    <div class="container">
+        <!-- Stats Row -->
         <div class="row mb-4">
-            <div class="col-md-3 mb-3">
-                <div class="card stat-card">
+            <div class="col-md-4">
+                <div class="card">
                     <div class="card-body d-flex align-items-center">
-                        <div class="icon bg-primary text-white me-3">
+                        <div class="rounded-circle p-3 bg-primary text-white me-3">
                             <i class="fas fa-key"></i>
                         </div>
                         <div>
@@ -118,24 +59,11 @@
                     </div>
                 </div>
             </div>
-            <div class="col-md-3 mb-3">
-                <div class="card stat-card">
+            <div class="col-md-4">
+                <div class="card">
                     <div class="card-body d-flex align-items-center">
-                        <div class="icon bg-success text-white me-3">
-                            <i class="fas fa-check-circle"></i>
-                        </div>
-                        <div>
-                            <small class="text-muted">Recargas Hoy</small>
-                            <h4 class="mb-0" id="statRecharges">-</h4>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3 mb-3">
-                <div class="card stat-card">
-                    <div class="card-body d-flex align-items-center">
-                        <div class="icon bg-warning text-white me-3">
-                            <i class="fas fa-users"></i>
+                        <div class="rounded-circle p-3 bg-success text-white me-3">
+                            <i class="fas fa-store"></i>
                         </div>
                         <div>
                             <small class="text-muted">Revendedores</small>
@@ -144,10 +72,10 @@
                     </div>
                 </div>
             </div>
-            <div class="col-md-3 mb-3">
-                <div class="card stat-card">
+            <div class="col-md-4">
+                <div class="card">
                     <div class="card-body d-flex align-items-center">
-                        <div class="icon bg-info text-white me-3">
+                        <div class="rounded-circle p-3 bg-info text-white me-3">
                             <i class="fas fa-coins"></i>
                         </div>
                         <div>
@@ -200,28 +128,39 @@
                         
                         <div class="row">
                             <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label class="form-label">Número de Destino</label>
-                                    <input type="tel" class="form-control" id="adminDestination" placeholder="0981234567" maxlength="10">
+                                <label class="form-label">Número de Destino</label>
+                                <div class="input-group mb-3">
+                                    <input type="text" class="form-control" id="adminDestination" 
+                                           placeholder="09XXXXXXXX" maxlength="10">
+                                    <button class="btn btn-primary" onclick="loadAdminPackages()">
+                                        <i class="fas fa-search"></i> Buscar Paquetes
+                                    </button>
                                 </div>
-                                <button class="btn btn-primary" onclick="loadAdminPackages()">
-                                    <i class="fas fa-search me-1"></i>Buscar Paquetes
-                                </button>
                             </div>
                         </div>
-
-                        <div id="adminPackagesContainer" class="mt-4" style="display:none;">
-                            <h6>Selecciona un paquete:</h6>
+                        
+                        <div id="adminPackagesLoading" class="text-center py-4" style="display: none;">
+                            <div class="spinner-border text-primary" role="status"></div>
+                            <p class="mt-2">Cargando paquetes...</p>
+                        </div>
+                        
+                        <div id="adminPackagesContainer" style="display: none;">
+                            <h5 class="mb-3">Selecciona un paquete:</h5>
                             <div id="adminPackagesList"></div>
                         </div>
-
-                        <div id="adminConfirmContainer" class="mt-4" style="display:none;">
-                            <div class="alert alert-warning" id="adminConfirmDetails"></div>
-                            <button class="btn btn-success btn-lg" onclick="doAdminRecharge()" id="adminRechargeBtn">
-                                <i class="fas fa-check me-2"></i>Confirmar Recarga Admin
-                            </button>
-                            <div id="adminRechargeResult" class="mt-3"></div>
-                        </div>
+                        
+                        <div id="adminPackagesError" class="alert alert-danger" style="display: none;"></div>
+                    </div>
+                </div>
+                
+                <div class="card" id="adminConfirmCard" style="display: none;">
+                    <div class="card-body">
+                        <h5><i class="fas fa-check-circle me-2"></i>Confirmar Recarga Admin</h5>
+                        <div id="adminConfirmDetails" class="alert alert-info"></div>
+                        <button class="btn btn-success btn-lg w-100" onclick="doAdminRecharge()" id="adminRechargeBtn">
+                            <i class="fas fa-check me-2"></i>Confirmar Recarga
+                        </button>
+                        <div id="adminRechargeResult" class="mt-3"></div>
                     </div>
                 </div>
             </div>
@@ -230,17 +169,24 @@
             <div class="tab-pane fade" id="keys">
                 <div class="card">
                     <div class="card-body">
-                        <h5><i class="fas fa-key me-2"></i>Gestión de Claves</h5>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5><i class="fas fa-key me-2"></i>Gestión de Claves</h5>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="showInactiveKeys" onchange="loadKeys()">
+                                <label class="form-check-label" for="showInactiveKeys">Mostrar inactivas</label>
+                            </div>
+                        </div>
                         <div class="table-responsive">
-                            <table class="table">
+                            <table class="table table-hover">
                                 <thead>
                                     <tr>
                                         <th>Clave</th>
-                                        <th>Telegram</th>
+                                        <th>Usuario</th>
                                         <th>Saldo</th>
                                         <th>Usado</th>
+                                        <th>Disponible</th>
                                         <th>Expira</th>
-                                        <th>Rol</th>
+                                        <th>Estado</th>
                                         <th>Acciones</th>
                                     </tr>
                                 </thead>
@@ -256,17 +202,18 @@
                 <div class="card">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center mb-3">
-                            <h5 class="mb-0"><i class="fas fa-store me-2"></i>Gestión de Revendedores</h5>
+                            <h5><i class="fas fa-store me-2"></i>Gestión de Revendedores</h5>
                             <button class="btn btn-primary btn-sm" onclick="showCreateReseller()">
                                 <i class="fas fa-plus me-1"></i>Nuevo Revendedor
                             </button>
                         </div>
                         <div class="table-responsive">
-                            <table class="table">
+                            <table class="table table-hover">
                                 <thead>
                                     <tr>
-                                        <th>Nombre</th>
                                         <th>Telegram ID</th>
+                                        <th>Usuario</th>
+                                        <th>Nombre</th>
                                         <th>Usuarios Asignados</th>
                                         <th>Estado</th>
                                         <th>Acciones</th>
@@ -284,7 +231,7 @@
                 <div class="card">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center mb-3">
-                            <h5 class="mb-0"><i class="fas fa-history me-2"></i>Historial de Recargas</h5>
+                            <h5><i class="fas fa-history me-2"></i>Historial de Recargas</h5>
                             <div>
                                 <label class="form-check-label me-2">
                                     <input type="checkbox" id="filterAdminOnly" class="form-check-input" onchange="loadHistory()">
@@ -354,6 +301,13 @@
                 <div class="modal-body">
                     <input type="hidden" id="editKeyId">
                     
+                    <div class="alert alert-secondary">
+                        <strong>Clave:</strong> <code id="editKeyDisplay" class="key-full"></code>
+                        <button class="btn btn-sm btn-outline-primary ms-2" onclick="copyEditKey()">
+                            <i class="fas fa-copy"></i> Copiar
+                        </button>
+                    </div>
+                    
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Saldo Máximo (Gs.)</label>
@@ -362,37 +316,31 @@
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Saldo Usado (Gs.)</label>
                             <input type="number" class="form-control" id="editUsedAmount">
+                            <small class="text-muted">Modifica para ajustar el saldo disponible</small>
                         </div>
                     </div>
                     
                     <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Días Adicionales de Validez</label>
-                            <input type="number" class="form-control" id="editValidDays" placeholder="30">
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Rol</label>
-                            <select class="form-select" id="editRole">
-                                <option value="USER">Usuario</option>
-                                <option value="RESELLER">Revendedor</option>
-                            </select>
+                        <div class="col-12 mb-3">
+                            <label class="form-label">Saldo Disponible (calculado)</label>
+                            <div class="alert alert-info py-2" id="editAvailableBalance">-</div>
                         </div>
                     </div>
                     
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Telegram ID</label>
-                            <div class="input-group">
-                                <input type="number" class="form-control" id="editTelegramId" placeholder="123456789">
-                                <button class="btn btn-outline-danger" onclick="unlinkTelegram()">
-                                    <i class="fas fa-unlink"></i>
-                                </button>
-                            </div>
+                            <input type="number" class="form-control" id="editTelegramId" placeholder="Sin vincular">
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Username Telegram</label>
-                            <input type="text" class="form-control" id="editTelegramUsername" placeholder="@usuario">
+                            <label class="form-label">Usuario Telegram</label>
+                            <input type="text" class="form-control" id="editTelegramUsername" readonly placeholder="Automático">
                         </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Descripción</label>
+                        <input type="text" class="form-control" id="editDescription" placeholder="Descripción del usuario">
                     </div>
                     
                     <hr>
@@ -428,8 +376,8 @@
                     <div class="bg-light p-3 rounded mt-3">
                         <code id="newKeyCode" style="font-size: 18px;"></code>
                     </div>
-                    <button class="btn btn-outline-primary mt-3" onclick="copyKey()">
-                        <i class="fas fa-copy me-1"></i>Copiar
+                    <button class="btn btn-outline-primary mt-3" onclick="copyNewKey()">
+                        <i class="fas fa-copy me-1"></i>Copiar Clave
                     </button>
                 </div>
             </div>
@@ -469,6 +417,74 @@
         </div>
     </div>
 
+    <!-- Modal Editar Revendedor -->
+    <div class="modal fade" id="editResellerModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-edit me-2"></i>Editar Revendedor</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="editResellerTelegramId">
+                    <div class="mb-3">
+                        <label class="form-label">Nombre del Revendedor</label>
+                        <input type="text" class="form-control" id="editResellerName">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Usuario Telegram</label>
+                        <input type="text" class="form-control" id="editResellerUsername" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">IDs de Usuarios Asignados (separados por coma)</label>
+                        <input type="text" class="form-control" id="editResellerUsers">
+                        <small class="text-muted">Telegram IDs que el revendedor puede ver</small>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="editResellerActive">
+                        <label class="form-check-label" for="editResellerActive">Activo</label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="saveResellerChanges()">
+                        <i class="fas fa-save me-1"></i>Guardar Cambios
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Recarga Exitosa -->
+    <div class="modal fade" id="successModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-body text-center p-5">
+                    <i class="fas fa-check-circle text-success" style="font-size: 80px;"></i>
+                    <h3 class="mt-3">¡Recarga Exitosa!</h3>
+                    <div id="successDetails" class="mt-3"></div>
+                    <button class="btn btn-primary mt-3" data-bs-dismiss="modal" onclick="resetAdminRecharge()">Entendido</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Recarga Fallida -->
+    <div class="modal fade" id="errorModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-body text-center p-5" style="background: #fff3cd;">
+                    <i class="fas fa-exclamation-triangle text-warning" style="font-size: 80px;"></i>
+                    <h3 class="mt-3">Recarga Fallida</h3>
+                    <div id="errorDetails" class="mt-3 alert alert-danger"></div>
+                    <button class="btn btn-warning mt-3" data-bs-dismiss="modal" onclick="resetAdminRechargeKeepLine()">
+                        <i class="fas fa-redo me-1"></i>Intentar de Nuevo
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         const token = localStorage.getItem('token');
@@ -484,6 +500,7 @@
         let adminPackages = [];
         let selectedAdminPackage = null;
         let notePresets = {};
+        let currentDestination = '';
 
         // Inicializar
         loadHealth();
@@ -492,6 +509,9 @@
         loadResellers();
         loadNotePresets();
 
+        // ============================================================
+        // FUNCIONES DE CARGA
+        // ============================================================
         async function loadHealth() {
             try {
                 const resp = await fetch('/api/admin/health', { headers });
@@ -533,8 +553,7 @@
             try {
                 const resp = await fetch('/api/admin/note-presets', { headers });
                 const data = await resp.json();
-                
-                if (data.success && data.presets) {
+                if (data.success) {
                     notePresets = data.presets;
                     renderNotePresets();
                 }
@@ -546,159 +565,51 @@
         function renderNotePresets() {
             const container = document.getElementById('notePresets');
             container.innerHTML = Object.entries(notePresets).map(([key, preset]) => `
-                <span class="note-preset" 
-                      style="background: ${preset.color}20; color: ${preset.color}; border: 1px solid ${preset.color}"
-                      onclick="selectNotePreset('${key}')">
+                <button type="button" class="btn btn-sm me-1 mb-1" 
+                        style="background: ${preset.color}20; border-color: ${preset.color}; color: ${preset.color}"
+                        onclick="selectNotePreset('${key}')">
                     ${preset.icon} ${preset.text}
-                </span>
+                </button>
             `).join('');
         }
 
         function selectNotePreset(key) {
             document.getElementById('editNotePreset').value = key;
             document.getElementById('editAdminNote').value = notePresets[key].text;
-            
-            // Marcar visualmente
-            document.querySelectorAll('.note-preset').forEach(el => el.style.fontWeight = 'normal');
-            event.target.style.fontWeight = 'bold';
-        }
-
-        async function loadAdminPackages() {
-            const dest = document.getElementById('adminDestination').value.trim();
-            if (!/^\d{10}$/.test(dest)) {
-                alert('Número inválido. Debe tener 10 dígitos');
-                return;
-            }
-
-            document.getElementById('adminPackagesContainer').style.display = 'block';
-            document.getElementById('adminPackagesList').innerHTML = '<div class="text-center py-3"><div class="spinner-border"></div></div>';
-
-            try {
-                const resp = await fetch('/api/admin/packages', {
-                    method: 'POST',
-                    headers,
-                    body: JSON.stringify({ destination: dest })
-                });
-                const data = await resp.json();
-
-                if (data.success && data.by_category) {
-                    adminPackages = data.packages || [];
-                    renderAdminPackages(data.by_category);
-                } else {
-                    document.getElementById('adminPackagesList').innerHTML = 
-                        `<div class="alert alert-danger">${data.error || 'Error cargando paquetes'}</div>`;
-                }
-            } catch (e) {
-                document.getElementById('adminPackagesList').innerHTML = 
-                    '<div class="alert alert-danger">Error de conexión</div>';
-            }
-        }
-
-        function renderAdminPackages(byCategory) {
-            const container = document.getElementById('adminPackagesList');
-            let html = '';
-
-            const categoryOrder = ['INTERNET_Y_LLAMADAS', 'ILIMITADOS', 'VOZ', 'OTROS'];
-            
-            for (const catKey of categoryOrder) {
-                const cat = byCategory[catKey];
-                if (!cat || cat.packages.length === 0) continue;
-
-                html += `<h6 class="mt-3">${cat.icon} ${cat.name}</h6>`;
-                html += '<div class="row">';
-                
-                cat.packages.forEach(pkg => {
-                    html += `
-                        <div class="col-md-4 mb-2">
-                            <div class="card" style="cursor:pointer" onclick="selectAdminPackage('${pkg.id}')">
-                                <div class="card-body py-2">
-                                    <strong>${pkg.name}</strong><br>
-                                    <span class="text-primary">Gs. ${pkg.amount.toLocaleString()}</span>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                });
-                
-                html += '</div>';
-            }
-
-            container.innerHTML = html || '<p class="text-muted">No hay paquetes</p>';
-        }
-
-        function selectAdminPackage(pkgId) {
-            selectedAdminPackage = adminPackages.find(p => p.id === pkgId);
-            if (!selectedAdminPackage) return;
-
-            const dest = document.getElementById('adminDestination').value;
-            document.getElementById('adminConfirmDetails').innerHTML = `
-                <strong>⚡ RECARGA DE ADMIN (SIN LÍMITE)</strong><br>
-                Destino: ${dest}<br>
-                Paquete: ${selectedAdminPackage.name}<br>
-                Monto: Gs. ${selectedAdminPackage.amount.toLocaleString()}
-            `;
-            document.getElementById('adminConfirmContainer').style.display = 'block';
-            document.getElementById('adminRechargeResult').innerHTML = '';
-        }
-
-        async function doAdminRecharge() {
-            if (!selectedAdminPackage) return;
-
-            const btn = document.getElementById('adminRechargeBtn');
-            btn.disabled = true;
-            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Procesando...';
-
-            try {
-                const resp = await fetch('/api/admin/recharge', {
-                    method: 'POST',
-                    headers,
-                    body: JSON.stringify({
-                        destination: document.getElementById('adminDestination').value,
-                        package_id: selectedAdminPackage.id
-                    })
-                });
-                const data = await resp.json();
-
-                if (data.success) {
-                    document.getElementById('adminRechargeResult').innerHTML = `
-                        <div class="alert alert-success">
-                            <i class="fas fa-check-circle me-2"></i>
-                            <strong>¡Recarga exitosa!</strong><br>
-                            Order ID: ${data.data.order_id}
-                        </div>
-                    `;
-                    document.getElementById('adminConfirmContainer').style.display = 'none';
-                    loadHistory();
-                } else {
-                    document.getElementById('adminRechargeResult').innerHTML = 
-                        `<div class="alert alert-danger">${data.error}</div>`;
-                }
-            } catch (e) {
-                document.getElementById('adminRechargeResult').innerHTML = 
-                    '<div class="alert alert-danger">Error de conexión</div>';
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fas fa-check me-2"></i>Confirmar Recarga Admin';
-            }
         }
 
         async function loadKeys() {
             try {
-                const resp = await fetch('/api/admin/keys', { headers });
+                const includeInactive = document.getElementById('showInactiveKeys')?.checked ? 'true' : 'false';
+                const resp = await fetch(`/api/admin/keys?include_inactive=${includeInactive}`, { headers });
                 const data = await resp.json();
 
-                if (data.success && data.keys) {
-                    const container = document.getElementById('keysList');
-                    container.innerHTML = data.keys.map(k => `
-                        <tr>
-                            <td><code>${k.key_masked}</code></td>
-                            <td>${k.telegram_id || '-'}</td>
-                            <td>Gs. ${k.max_amount.toLocaleString()}</td>
+                if (data.success) {
+                    const tbody = document.getElementById('keysList');
+                    tbody.innerHTML = data.keys.map(k => {
+                        const remaining = k.max_amount - (k.used_amount || 0);
+                        const telegramInfo = k.telegram_username 
+                            ? `@${k.telegram_username}` 
+                            : (k.telegram_first_name || (k.telegram_id ? `ID: ${k.telegram_id}` : '-'));
+                        
+                        return `
+                        <tr class="${k.active ? '' : 'table-secondary'}">
+                            <td>
+                                <code class="key-full">${k.key}</code>
+                                <button class="btn btn-sm btn-outline-secondary key-copy-btn" onclick="copyToClipboard('${k.key}')">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                            </td>
+                            <td>
+                                <span title="Telegram ID: ${k.telegram_id || 'No vinculado'}">${telegramInfo}</span>
+                            </td>
+                            <td>Gs. ${k.max_amount?.toLocaleString() || 0}</td>
                             <td>Gs. ${(k.used_amount || 0).toLocaleString()}</td>
+                            <td><strong>Gs. ${remaining.toLocaleString()}</strong></td>
                             <td>${new Date(k.expires).toLocaleDateString()}</td>
                             <td>
-                                <span class="badge ${k.role === 'RESELLER' ? 'bg-warning' : 'bg-secondary'}">
-                                    ${k.role || 'USER'}
+                                <span class="badge ${k.active ? 'bg-success' : 'bg-danger'}">
+                                    ${k.active ? 'Activa' : 'Inactiva'}
                                 </span>
                             </td>
                             <td>
@@ -713,28 +624,260 @@
                                 </button>
                             </td>
                         </tr>
-                    `).join('');
+                    `}).join('') || '<tr><td colspan="8" class="text-muted">No hay claves</td></tr>';
                 }
             } catch (e) {
                 console.error(e);
             }
         }
 
+        async function loadHistory() {
+            try {
+                const adminOnly = document.getElementById('filterAdminOnly')?.checked ? 'true' : 'false';
+                const resp = await fetch(`/api/admin/history?admin_only=${adminOnly}&limit=50`, { headers });
+                const data = await resp.json();
+
+                if (data.success) {
+                    const tbody = document.getElementById('historyList');
+                    tbody.innerHTML = data.history.map(h => `
+                        <tr>
+                            <td>${new Date(h.timestamp).toLocaleString()}</td>
+                            <td>${h.destination}</td>
+                            <td>${h.package_name}</td>
+                            <td>Gs. ${h.amount?.toLocaleString() || 0}</td>
+                            <td>
+                                <span class="badge ${h.status === 'SUCCESS' ? 'bg-success' : 'bg-danger'}">
+                                    ${h.status}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge ${h.is_admin_recharge ? 'bg-warning' : 'bg-info'}">
+                                    ${h.is_admin_recharge ? 'Admin' : 'Usuario'}
+                                </span>
+                            </td>
+                        </tr>
+                    `).join('') || '<tr><td colspan="6" class="text-muted">No hay historial</td></tr>';
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        async function loadResellers() {
+            try {
+                const resp = await fetch('/api/admin/resellers', { headers });
+                const data = await resp.json();
+
+                if (data.success) {
+                    const tbody = document.getElementById('resellersList');
+                    tbody.innerHTML = data.resellers.map(r => {
+                        const telegramInfo = r.telegram_username 
+                            ? `@${r.telegram_username}` 
+                            : (r.telegram_first_name || '-');
+                        
+                        return `
+                        <tr>
+                            <td>${r.telegram_id}</td>
+                            <td>${telegramInfo}</td>
+                            <td>${r.name}</td>
+                            <td>${(r.assigned_users || []).length} usuarios</td>
+                            <td>
+                                <span class="badge ${r.active ? 'bg-success' : 'bg-danger'}">
+                                    ${r.active ? 'Activo' : 'Inactivo'}
+                                </span>
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary" onclick="editReseller(${r.telegram_id})">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger" onclick="deleteReseller(${r.telegram_id})">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `}).join('') || '<tr><td colspan="6" class="text-muted">No hay revendedores</td></tr>';
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        // ============================================================
+        // RECARGA ADMIN
+        // ============================================================
+        async function loadAdminPackages() {
+            const dest = document.getElementById('adminDestination').value.trim();
+            if (!/^\d{10}$/.test(dest)) {
+                alert('Ingresa un número de 10 dígitos válido');
+                return;
+            }
+
+            currentDestination = dest;
+            document.getElementById('adminPackagesLoading').style.display = 'block';
+            document.getElementById('adminPackagesContainer').style.display = 'none';
+            document.getElementById('adminPackagesError').style.display = 'none';
+            document.getElementById('adminConfirmCard').style.display = 'none';
+
+            try {
+                const resp = await fetch('/api/admin/packages', {
+                    method: 'POST',
+                    headers,
+                    body: JSON.stringify({ destination: dest })
+                });
+                const data = await resp.json();
+
+                document.getElementById('adminPackagesLoading').style.display = 'none';
+
+                if (data.success) {
+                    adminPackages = data.packages || [];
+                    renderAdminPackages(data.by_category || {});
+                    document.getElementById('adminPackagesContainer').style.display = 'block';
+                } else {
+                    document.getElementById('adminPackagesError').textContent = data.error || 'Error cargando paquetes';
+                    document.getElementById('adminPackagesError').style.display = 'block';
+                }
+            } catch (e) {
+                document.getElementById('adminPackagesLoading').style.display = 'none';
+                document.getElementById('adminPackagesError').textContent = 'Error de conexión';
+                document.getElementById('adminPackagesError').style.display = 'block';
+            }
+        }
+
+        function renderAdminPackages(byCategory) {
+            const container = document.getElementById('adminPackagesList');
+            let html = '';
+
+            for (const [catKey, catData] of Object.entries(byCategory)) {
+                if (catData.packages && catData.packages.length > 0) {
+                    html += `<div class="category-header"><strong>${catData.icon || '📦'} ${catData.name}</strong> (${catData.count})</div>`;
+                    html += '<div class="row">';
+                    for (const pkg of catData.packages) {
+                        html += `
+                            <div class="col-md-4 mb-2">
+                                <div class="card package-card p-2" onclick="selectAdminPackage('${pkg.id}')" data-pkg-id="${pkg.id}">
+                                    <div class="d-flex justify-content-between">
+                                        <strong>${pkg.name}</strong>
+                                        <span class="badge bg-primary">Gs. ${pkg.amount?.toLocaleString()}</span>
+                                    </div>
+                                    <small class="text-muted">${pkg.description || ''}</small>
+                                    <small class="text-info">${pkg.validity || ''}</small>
+                                </div>
+                            </div>
+                        `;
+                    }
+                    html += '</div>';
+                }
+            }
+
+            container.innerHTML = html || '<p class="text-muted">No hay paquetes disponibles</p>';
+        }
+
+        function selectAdminPackage(pkgId) {
+            document.querySelectorAll('.package-card').forEach(el => el.classList.remove('selected'));
+            document.querySelector(`[data-pkg-id="${pkgId}"]`)?.classList.add('selected');
+            
+            selectedAdminPackage = adminPackages.find(p => p.id === pkgId);
+            
+            if (selectedAdminPackage) {
+                document.getElementById('adminConfirmDetails').innerHTML = `
+                    <strong>Destino:</strong> ${currentDestination}<br>
+                    <strong>Paquete:</strong> ${selectedAdminPackage.name}<br>
+                    <strong>Monto:</strong> Gs. ${selectedAdminPackage.amount?.toLocaleString()}<br>
+                    <strong>Descripción:</strong> ${selectedAdminPackage.description || '-'}
+                `;
+                document.getElementById('adminConfirmCard').style.display = 'block';
+            }
+        }
+
+        async function doAdminRecharge() {
+            if (!selectedAdminPackage || !currentDestination) {
+                alert('Selecciona un paquete');
+                return;
+            }
+
+            const btn = document.getElementById('adminRechargeBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Procesando...';
+
+            try {
+                const resp = await fetch('/api/admin/recharge', {
+                    method: 'POST',
+                    headers,
+                    body: JSON.stringify({
+                        destination: currentDestination,
+                        package_id: selectedAdminPackage.id
+                    })
+                });
+                const data = await resp.json();
+
+                if (data.success) {
+                    document.getElementById('successDetails').innerHTML = `
+                        <p><strong>Destino:</strong> ${currentDestination}</p>
+                        <p><strong>Paquete:</strong> ${selectedAdminPackage.name}</p>
+                        <p><strong>Monto:</strong> Gs. ${selectedAdminPackage.amount?.toLocaleString()}</p>
+                        <p><strong>Order ID:</strong> ${data.data?.order_id || '-'}</p>
+                    `;
+                    new bootstrap.Modal(document.getElementById('successModal')).show();
+                    loadHistory();
+                } else {
+                    // Mostrar modal de error
+                    document.getElementById('errorDetails').innerHTML = `
+                        <p><strong>Error:</strong> ${data.error || 'Error desconocido'}</p>
+                        <p><strong>Destino:</strong> ${currentDestination}</p>
+                        <p><strong>Paquete:</strong> ${selectedAdminPackage.name}</p>
+                    `;
+                    new bootstrap.Modal(document.getElementById('errorModal')).show();
+                    loadHistory();
+                }
+            } catch (e) {
+                document.getElementById('errorDetails').innerHTML = `
+                    <p><strong>Error:</strong> Error de conexión</p>
+                    <p>Por favor verifica tu conexión e intenta de nuevo.</p>
+                `;
+                new bootstrap.Modal(document.getElementById('errorModal')).show();
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-check me-2"></i>Confirmar Recarga';
+            }
+        }
+
+        function resetAdminRecharge() {
+            document.getElementById('adminDestination').value = '';
+            document.getElementById('adminPackagesContainer').style.display = 'none';
+            document.getElementById('adminConfirmCard').style.display = 'none';
+            selectedAdminPackage = null;
+            currentDestination = '';
+        }
+
+        function resetAdminRechargeKeepLine() {
+            // Mantiene la línea y vuelve a cargar paquetes
+            document.getElementById('adminConfirmCard').style.display = 'none';
+            selectedAdminPackage = null;
+            loadHistory();
+            // No limpia el destino para poder reintentar
+        }
+
+        // ============================================================
+        // GESTIÓN DE CLAVES
+        // ============================================================
         async function editKey(key) {
             try {
                 const resp = await fetch(`/api/admin/keys/${key}`, { headers });
                 const data = await resp.json();
 
                 if (data.success) {
+                    const info = data.info;
                     document.getElementById('editKeyId').value = key;
-                    document.getElementById('editMaxAmount').value = data.info.max_amount;
-                    document.getElementById('editUsedAmount').value = data.info.used_amount || 0;
-                    document.getElementById('editTelegramId').value = data.info.telegram_id || '';
-                    document.getElementById('editTelegramUsername').value = data.info.telegram_username || '';
-                    document.getElementById('editRole').value = data.info.role || 'USER';
-                    document.getElementById('editValidDays').value = '';
+                    document.getElementById('editKeyDisplay').textContent = key;
+                    document.getElementById('editMaxAmount').value = info.max_amount || 0;
+                    document.getElementById('editUsedAmount').value = info.used_amount || 0;
+                    document.getElementById('editTelegramId').value = info.telegram_id || '';
+                    document.getElementById('editTelegramUsername').value = info.telegram_username || '';
+                    document.getElementById('editDescription').value = info.description || '';
                     document.getElementById('editAdminNote').value = '';
                     document.getElementById('editNotePreset').value = '';
+                    
+                    updateAvailableBalance();
                     
                     new bootstrap.Modal(document.getElementById('editKeyModal')).show();
                 }
@@ -743,6 +886,18 @@
             }
         }
 
+        function updateAvailableBalance() {
+            const max = parseInt(document.getElementById('editMaxAmount').value) || 0;
+            const used = parseInt(document.getElementById('editUsedAmount').value) || 0;
+            const available = max - used;
+            document.getElementById('editAvailableBalance').innerHTML = 
+                `<strong>Gs. ${available.toLocaleString()}</strong> disponible`;
+        }
+
+        // Listeners para actualizar saldo disponible
+        document.getElementById('editMaxAmount')?.addEventListener('input', updateAvailableBalance);
+        document.getElementById('editUsedAmount')?.addEventListener('input', updateAvailableBalance);
+
         async function saveKeyChanges() {
             const key = document.getElementById('editKeyId').value;
             const data = {
@@ -750,16 +905,10 @@
                 used_amount: parseInt(document.getElementById('editUsedAmount').value),
                 telegram_id: document.getElementById('editTelegramId').value ? 
                     parseInt(document.getElementById('editTelegramId').value) : null,
-                telegram_username: document.getElementById('editTelegramUsername').value || null,
-                role: document.getElementById('editRole').value,
-                admin_note: document.getElementById('editAdminNote').value || null,
+                description: document.getElementById('editDescription').value,
+                admin_note: document.getElementById('editAdminNote').value,
                 note_preset: document.getElementById('editNotePreset').value || null
             };
-
-            const validDays = document.getElementById('editValidDays').value;
-            if (validDays) {
-                data.valid_days = parseInt(validDays);
-            }
 
             try {
                 const resp = await fetch(`/api/admin/keys/${key}`, {
@@ -781,28 +930,9 @@
             }
         }
 
-        async function unlinkTelegram() {
-            const key = document.getElementById('editKeyId').value;
-            if (!confirm('¿Desvincular Telegram de esta clave?')) return;
-
-            try {
-                const resp = await fetch(`/api/admin/keys/${key}/unlink`, {
-                    method: 'POST',
-                    headers,
-                    body: JSON.stringify({ admin_note: 'Desvinculación manual' })
-                });
-                const data = await resp.json();
-
-                if (data.success) {
-                    document.getElementById('editTelegramId').value = '';
-                    document.getElementById('editTelegramUsername').value = '';
-                    alert('Telegram desvinculado');
-                } else {
-                    alert('Error: ' + data.error);
-                }
-            } catch (e) {
-                alert('Error de conexión');
-            }
+        function copyEditKey() {
+            const key = document.getElementById('editKeyDisplay').textContent;
+            copyToClipboard(key);
         }
 
         async function addBalance(key) {
@@ -879,7 +1009,7 @@
                     new bootstrap.Modal(document.getElementById('newKeyModal')).show();
                     loadKeys();
                     
-                    // Limpiar form
+                    // Limpiar formulario
                     document.getElementById('newKeyAmount').value = '';
                     document.getElementById('newKeyTelegram').value = '';
                     document.getElementById('newKeyDesc').value = '';
@@ -891,39 +1021,9 @@
             }
         }
 
-        async function loadResellers() {
-            try {
-                const resp = await fetch('/api/admin/resellers', { headers });
-                const data = await resp.json();
-
-                if (data.success && data.resellers) {
-                    const container = document.getElementById('resellersList');
-                    container.innerHTML = data.resellers.map(r => `
-                        <tr>
-                            <td>${r.name}</td>
-                            <td>${r.telegram_id}</td>
-                            <td>${(r.assigned_users || []).length} usuarios</td>
-                            <td>
-                                <span class="badge ${r.active ? 'bg-success' : 'bg-danger'}">
-                                    ${r.active ? 'Activo' : 'Inactivo'}
-                                </span>
-                            </td>
-                            <td>
-                                <button class="btn btn-sm btn-outline-primary" onclick="editReseller(${r.telegram_id})">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <button class="btn btn-sm btn-outline-danger" onclick="deleteReseller(${r.telegram_id})">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </td>
-                        </tr>
-                    `).join('') || '<tr><td colspan="5" class="text-muted">No hay revendedores</td></tr>';
-                }
-            } catch (e) {
-                console.error(e);
-            }
-        }
-
+        // ============================================================
+        // GESTIÓN DE REVENDEDORES
+        // ============================================================
         function showCreateReseller() {
             document.getElementById('resellerName').value = '';
             document.getElementById('resellerTelegramId').value = '';
@@ -968,6 +1068,60 @@
             }
         }
 
+        async function editReseller(telegramId) {
+            try {
+                const resp = await fetch(`/api/admin/resellers/${telegramId}`, { headers });
+                const data = await resp.json();
+
+                if (data.success) {
+                    const r = data.reseller;
+                    document.getElementById('editResellerTelegramId').value = r.telegram_id;
+                    document.getElementById('editResellerName').value = r.name || '';
+                    document.getElementById('editResellerUsername').value = r.telegram_username ? `@${r.telegram_username}` : (r.telegram_first_name || '-');
+                    document.getElementById('editResellerUsers').value = (r.assigned_users || []).join(', ');
+                    document.getElementById('editResellerActive').checked = r.active;
+                    
+                    new bootstrap.Modal(document.getElementById('editResellerModal')).show();
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            } catch (e) {
+                alert('Error cargando revendedor');
+            }
+        }
+
+        async function saveResellerChanges() {
+            const telegramId = document.getElementById('editResellerTelegramId').value;
+            const name = document.getElementById('editResellerName').value;
+            const usersStr = document.getElementById('editResellerUsers').value;
+            const active = document.getElementById('editResellerActive').checked;
+
+            const assignedUsers = usersStr ? usersStr.split(',').map(s => parseInt(s.trim())).filter(n => !isNaN(n)) : [];
+
+            try {
+                const resp = await fetch(`/api/admin/resellers/${telegramId}`, {
+                    method: 'PUT',
+                    headers,
+                    body: JSON.stringify({
+                        name,
+                        assigned_users: assignedUsers,
+                        active
+                    })
+                });
+                const data = await resp.json();
+
+                if (data.success) {
+                    bootstrap.Modal.getInstance(document.getElementById('editResellerModal')).hide();
+                    loadResellers();
+                    alert('Revendedor actualizado');
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            } catch (e) {
+                alert('Error de conexión');
+            }
+        }
+
         async function deleteReseller(telegramId) {
             if (!confirm('¿Desactivar este revendedor?')) return;
 
@@ -980,6 +1134,7 @@
 
                 if (data.success) {
                     loadResellers();
+                    loadHealth();
                 } else {
                     alert('Error: ' + data.error);
                 }
@@ -988,39 +1143,31 @@
             }
         }
 
-        async function loadHistory() {
-            const adminOnly = document.getElementById('filterAdminOnly').checked;
-            
-            try {
-                const url = adminOnly ? '/api/admin/history?admin_only=true' : '/api/admin/history';
-                const resp = await fetch(url, { headers });
-                const data = await resp.json();
+        // ============================================================
+        // UTILIDADES
+        // ============================================================
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                // Feedback visual temporal
+                const toast = document.createElement('div');
+                toast.className = 'position-fixed bottom-0 end-0 p-3';
+                toast.innerHTML = `
+                    <div class="toast show" role="alert">
+                        <div class="toast-body bg-success text-white rounded">
+                            <i class="fas fa-check me-1"></i> Copiado al portapapeles
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(toast);
+                setTimeout(() => toast.remove(), 2000);
+            }).catch(() => {
+                alert('Error al copiar');
+            });
+        }
 
-                if (data.success && data.history) {
-                    const container = document.getElementById('historyList');
-                    container.innerHTML = data.history.map(h => `
-                        <tr>
-                            <td>${new Date(h.timestamp).toLocaleString()}</td>
-                            <td>${h.destination}</td>
-                            <td>${h.package_name || '-'}</td>
-                            <td>Gs. ${(h.amount || 0).toLocaleString()}</td>
-                            <td>
-                                <span class="badge ${h.status === 'SUCCESS' ? 'bg-success' : 'bg-danger'}">
-                                    ${h.status}
-                                </span>
-                            </td>
-                            <td>
-                                ${h.is_admin_recharge ? '<span class="badge bg-warning">👑 Admin</span>' : '<span class="badge bg-secondary">Usuario</span>'}
-                            </td>
-                        </tr>
-                    `).join('') || '<tr><td colspan="6" class="text-muted">No hay historial</td></tr>';
-
-                    // Actualizar stat
-                    document.getElementById('statRecharges').textContent = data.stats?.successful || 0;
-                }
-            } catch (e) {
-                console.error(e);
-            }
+        function copyNewKey() {
+            const key = document.getElementById('newKeyCode').textContent;
+            copyToClipboard(key);
         }
 
         async function refreshAuth() {
@@ -1043,12 +1190,6 @@
             } catch (e) {
                 alert('Error');
             }
-        }
-
-        function copyKey() {
-            const key = document.getElementById('newKeyCode').textContent;
-            navigator.clipboard.writeText(key);
-            alert('Clave copiada');
         }
 
         function logout() {

@@ -2,11 +2,13 @@
 # -*- coding: utf-8 -*-
 """
 config.py - Configuración del Bot Telegram OTP
+CORREGIDO v2.3
 """
 
 import os
 
 # Token del bot (obtener de @BotFather)
+# IMPORTANTE: Este token debe ser configurado con tu token real
 BOT_TOKEN = "8458859222:AAFGCvcvYnnxxvOiSenjfnTBkhKj1cW43YM"
 
 # ID del administrador (tu Telegram ID)
@@ -17,6 +19,10 @@ WEB_URL = "http://155.117.45.228:8000"
 
 # Tiempo de expiración del OTP en minutos
 OTP_EXPIRATION_MINUTES = 10
+
+# === API CONFIG (para registrar usernames) ===
+API_URL = "http://localhost:5000"
+SHARED_BEARER_TOKEN = "TigoRecargas2026SecureToken_XyZ789"
 
 # === RUTA COMPARTIDA PARA OTPs ===
 # Usar ruta absoluta para que WebApp pueda leer los OTPs

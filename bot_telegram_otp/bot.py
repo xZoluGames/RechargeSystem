@@ -1,12 +1,18 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-bot.py - Bot de Telegram para generar códigos OTP
+bot.py - Bot de Telegram para OTP
+CORREGIDO v2.3:
+- Usa config.py separado para configuración
+- Registra el username de Telegram en la API al generar OTP
+- Soporta enlace directo de login
 """
 
-import logging
+import os
 import json
+import logging
 import secrets
+import requests
 from datetime import datetime, timedelta
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, ContextTypes
@@ -16,10 +22,16 @@ from config import (
     ADMIN_TELEGRAM_ID,
     WEB_URL,
     OTP_EXPIRATION_MINUTES,
-    OTP_FILE
+    OTP_FILE,
+    API_URL,
+    SHARED_BEARER_TOKEN
 )
 
-# Configurar logging
+# Crear directorios necesarios
+os.makedirs('logs', exist_ok=True)
+os.makedirs('data', exist_ok=True)
+
+# Logging
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -30,28 +42,22 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# ============================================================
-# GESTOR DE OTPs
-# ============================================================
 
+# ============================================================
+# OTP MANAGER
+# ============================================================
 class OTPManager:
-    """Gestiona los códigos OTP"""
-    
     def __init__(self, otp_file: str):
         self.otp_file = otp_file
         self._ensure_file()
     
     def _ensure_file(self):
-        """Crea el archivo si no existe"""
-        try:
-            with open(self.otp_file, 'r') as f:
-                json.load(f)
-        except (FileNotFoundError, json.JSONDecodeError):
+        if not os.path.exists(self.otp_file):
+            os.makedirs(os.path.dirname(self.otp_file), exist_ok=True)
             with open(self.otp_file, 'w') as f:
                 json.dump({}, f)
     
     def _load(self) -> dict:
-        """Carga los OTPs"""
         try:
             with open(self.otp_file, 'r') as f:
                 return json.load(f)
@@ -59,13 +65,11 @@ class OTPManager:
             return {}
     
     def _save(self, data: dict):
-        """Guarda los OTPs"""
         with open(self.otp_file, 'w') as f:
             json.dump(data, f, indent=2)
     
     def generate(self, telegram_id: int) -> str:
-        """Genera un nuevo OTP para un usuario"""
-        otp_code = str(secrets.randbelow(900000) + 100000)  # 6 dígitos
+        otp_code = str(secrets.randbelow(900000) + 100000)
         
         data = self._load()
         data[str(telegram_id)] = {
@@ -80,62 +84,81 @@ class OTPManager:
         return otp_code
     
     def verify(self, telegram_id: int, otp_code: str) -> bool:
-        """Verifica un código OTP"""
         data = self._load()
         tid_str = str(telegram_id)
         
         if tid_str not in data:
-            logger.warning(f"No hay OTP para {telegram_id}")
             return False
         
         otp_data = data[tid_str]
         
-        # Verificar si ya fue usado
         if otp_data.get('used', False):
-            logger.warning(f"OTP ya usado para {telegram_id}")
             return False
         
-        # Verificar expiración
         try:
             expires = datetime.fromisoformat(otp_data['expires_at'])
             if datetime.now() > expires:
-                logger.warning(f"OTP expirado para {telegram_id}")
                 return False
         except:
             return False
         
-        # Verificar código
         if otp_data['code'] != otp_code:
-            logger.warning(f"OTP incorrecto para {telegram_id}")
             return False
         
-        # Marcar como usado
         data[tid_str]['used'] = True
         data[tid_str]['used_at'] = datetime.now().isoformat()
         self._save(data)
         
-        logger.info(f"OTP verificado correctamente para {telegram_id}")
         return True
 
 
-# Instancia global
 otp_manager = OTPManager(OTP_FILE)
 
 
-# Función exportada para uso externo
 def verify_otp_code(telegram_id: int, otp_code: str) -> bool:
     """Función exportada para verificar OTP desde otros módulos"""
     return otp_manager.verify(telegram_id, otp_code)
 
 
 # ============================================================
+# API HELPER - Registrar username
+# ============================================================
+def register_username_in_api(telegram_id: int, username: str, first_name: str):
+    """Registra el username de Telegram en la API"""
+    try:
+        headers = {
+            'Content-Type': 'application/json',
+            'Authorization': f'Bearer {SHARED_BEARER_TOKEN}'
+        }
+        data = {
+            'telegram_id': telegram_id,
+            'username': username or '',
+            'first_name': first_name or ''
+        }
+        response = requests.post(
+            f"{API_URL}/api/telegram/register-username",
+            headers=headers,
+            json=data,
+            timeout=5
+        )
+        if response.status_code == 200:
+            logger.info(f"Username registrado: {telegram_id} -> @{username}")
+        else:
+            logger.warning(f"No se pudo registrar username: {response.status_code}")
+    except Exception as e:
+        logger.warning(f"Error registrando username: {e}")
+
+
+# ============================================================
 # COMANDOS DEL BOT
 # ============================================================
-
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Comando /start"""
     user = update.effective_user
     is_admin = user.id == ADMIN_TELEGRAM_ID
+    
+    # Registrar username en la API
+    register_username_in_api(user.id, user.username, user.first_name)
     
     message = f"""👋 ¡Hola {user.first_name}!
 
@@ -164,6 +187,9 @@ async def otp_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Comando /otp - Genera código OTP"""
     user = update.effective_user
     is_admin = user.id == ADMIN_TELEGRAM_ID
+    
+    # Registrar username en la API
+    register_username_in_api(user.id, user.username, user.first_name)
     
     # Generar OTP
     otp_code = otp_manager.generate(user.id)
@@ -201,6 +227,9 @@ async def myid_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Comando /myid - Muestra el Telegram ID"""
     user = update.effective_user
     
+    # Registrar username en la API
+    register_username_in_api(user.id, user.username, user.first_name)
+    
     message = f"""🆔 *Tu Telegram ID*
 
 `{user.id}`
@@ -232,11 +261,13 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # ============================================================
 # MAIN
 # ============================================================
-
 def main():
     """Iniciar el bot"""
-    import os
-    os.makedirs('logs', exist_ok=True)
+    logger.info("=" * 50)
+    logger.info("INICIANDO BOT TELEGRAM OTP v2.3")
+    logger.info(f"Admin ID: {ADMIN_TELEGRAM_ID}")
+    logger.info(f"Web URL: {WEB_URL}")
+    logger.info("=" * 50)
     
     # Crear aplicación
     app = Application.builder().token(BOT_TOKEN).build()
@@ -247,7 +278,7 @@ def main():
     app.add_handler(CommandHandler("myid", myid_command))
     app.add_handler(CommandHandler("help", help_command))
     
-    logger.info("Bot iniciado correctamente")
+    logger.info("✅ Bot iniciado correctamente")
     
     # Ejecutar
     app.run_polling(allowed_updates=Update.ALL_TYPES)

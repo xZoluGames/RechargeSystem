@@ -4,15 +4,11 @@
 api.py - API REST Principal para Sistema de Recargas Tigo
 Puerto 5000
 
-MODIFICADO v2.2:
+CORREGIDO v2.3:
+- NUEVO endpoint /api/admin/packages que NO requiere API key
+- Endpoint para obtener username de Telegram por ID
 - Bearer token obligatorio en todas las rutas protegidas
 - Admin puede recargar sin límite (con historial)
-- Admin puede modificar claves: saldo, validez, telegram_id
-- Vinculación de clave a Telegram ID (1 clave por usuario)
-- Historial de modificaciones visible para usuarios
-- Notas administrativas con colores predefinidos
-- Rol de Revendedor: ver usuarios asignados
-- Paquetes organizados por categorías
 """
 
 from flask import Flask, request, jsonify
@@ -24,6 +20,7 @@ import json
 import traceback
 from datetime import datetime
 from typing import Dict, Optional
+import requests
 
 from config import (
     API_PORT,
@@ -75,6 +72,45 @@ package_manager = PackageManager()
 
 system_initialized = False
 current_auth_method = "new"
+
+# ============================================================
+# CONFIGURACIÓN BOT TELEGRAM (para obtener usernames)
+# ============================================================
+TELEGRAM_BOT_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN', '')
+TELEGRAM_USERNAMES_FILE = os.path.join(DATA_DIR, 'telegram_usernames.json')
+
+def load_telegram_usernames() -> Dict:
+    """Carga el cache de usernames de Telegram"""
+    try:
+        if os.path.exists(TELEGRAM_USERNAMES_FILE):
+            with open(TELEGRAM_USERNAMES_FILE, 'r', encoding='utf-8') as f:
+                return json.load(f)
+    except:
+        pass
+    return {}
+
+def save_telegram_usernames(data: Dict):
+    """Guarda el cache de usernames"""
+    try:
+        with open(TELEGRAM_USERNAMES_FILE, 'w', encoding='utf-8') as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+    except Exception as e:
+        logger.error(f"Error guardando usernames: {e}")
+
+def get_telegram_username(telegram_id: int) -> Optional[str]:
+    """Obtiene el username de Telegram desde el cache"""
+    usernames = load_telegram_usernames()
+    return usernames.get(str(telegram_id), {}).get('username')
+
+def update_telegram_username(telegram_id: int, username: str, first_name: str = None):
+    """Actualiza el username de Telegram en el cache"""
+    usernames = load_telegram_usernames()
+    usernames[str(telegram_id)] = {
+        'username': username,
+        'first_name': first_name,
+        'updated_at': datetime.now().isoformat()
+    }
+    save_telegram_usernames(usernames)
 
 
 # ============================================================
@@ -172,12 +208,12 @@ def require_reseller_or_admin(f):
             except:
                 pass
         
-        return jsonify({'success': False, 'error': 'Requiere permisos de revendedor o admin'}), 403
+        return jsonify({'success': False, 'error': 'No autorizado'}), 403
     return decorated
 
 
 # ============================================================
-# FUNCIONES AUXILIARES
+# FUNCIONES DE AUTENTICACIÓN
 # ============================================================
 def init_auth_system(use_new_method: bool = True, username: str = None) -> bool:
     global tigo_api, system_initialized, current_auth_method
@@ -227,7 +263,23 @@ def check_retry_initialization():
             if auth:
                 tigo_api = TigoAPI(auth)
                 system_initialized = True
+                logger.info(f"✅ Reinicio exitoso: {msg}")
+
+
+def try_legacy_auth() -> bool:
+    global tigo_api, system_initialized, current_auth_method
+    
+    for username, config in TIGO_ACCOUNTS.items():
+        try:
+            legacy_auth = TigoAuthLegacy(username, config['password'])
+            if legacy_auth.login():
+                tigo_api = TigoAPI(legacy_auth)
+                system_initialized = True
+                current_auth_method = "legacy"
+                logger.info(f"✅ Auth legacy exitoso: {username}")
                 return True
+        except Exception as e:
+            logger.error(f"Error auth legacy {username}: {e}")
     return False
 
 
@@ -295,7 +347,7 @@ def save_to_history(api_key: str, destination: str, package: Dict,
 def index():
     return jsonify({
         'service': 'Tigo Recharge API',
-        'version': '2.2',
+        'version': '2.3',
         'status': 'running',
         'bearer_required': True,
         'features': ['Admin sin límite', 'Vinculación Telegram', 'Roles', 'Categorías']
@@ -339,6 +391,53 @@ def get_note_presets():
 @require_bearer
 def get_package_categories():
     return jsonify({'success': True, 'categories': PACKAGE_CATEGORIES}), 200
+
+
+# ============================================================
+# ENDPOINT PARA REGISTRAR USERNAME DE TELEGRAM (llamado por el bot)
+# ============================================================
+@app.route('/api/telegram/register-username', methods=['POST'])
+@require_bearer
+def register_telegram_username():
+    """Registra el username de un usuario de Telegram (llamado por el bot)"""
+    try:
+        data = request.get_json()
+        telegram_id = data.get('telegram_id')
+        username = data.get('username')
+        first_name = data.get('first_name')
+        
+        if not telegram_id:
+            return jsonify({'success': False, 'error': 'telegram_id requerido'}), 400
+        
+        update_telegram_username(telegram_id, username, first_name)
+        
+        # También actualizar en la clave si existe
+        key = key_manager.get_key_by_telegram_id(telegram_id)
+        if key:
+            key_manager.modify_key(key, telegram_username=username)
+        
+        return jsonify({
+            'success': True,
+            'message': 'Username registrado',
+            'data': {
+                'telegram_id': telegram_id,
+                'username': username,
+                'first_name': first_name
+            }
+        }), 200
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/telegram/usernames', methods=['GET'])
+@require_admin
+def get_all_telegram_usernames():
+    """Obtiene todos los usernames registrados"""
+    usernames = load_telegram_usernames()
+    return jsonify({
+        'success': True,
+        'usernames': usernames
+    }), 200
 
 
 # ============================================================
@@ -451,7 +550,13 @@ def create_recharge():
                 }
             }), 200
         else:
-            return jsonify({'success': False, 'error': result_msg, 'order_data': order_data}), 500
+            return jsonify({
+                'success': False, 
+                'error': result_msg, 
+                'order_data': order_data,
+                'destination': destination,
+                'package': {'id': selected_package.get('id'), 'name': selected_package.get('name'), 'amount': package_amount}
+            }), 500
         
     except Exception as e:
         logger.error(f"Error en /api/recharge: {e}")
@@ -580,6 +685,52 @@ def admin_status():
         return jsonify({'success': False, 'error': str(e)}), 500
 
 
+# ============================================================
+# ENDPOINT CORREGIDO: PAQUETES PARA ADMIN (SIN API KEY)
+# ============================================================
+@app.route('/api/admin/packages', methods=['GET', 'POST'])
+@require_admin
+def admin_get_packages():
+    """
+    CORREGIDO: Obtiene paquetes para el admin SIN requerir API key.
+    Usa las credenciales de admin para autenticación.
+    """
+    try:
+        data = request.get_json() or {} if request.method == 'POST' else request.args.to_dict()
+        destination = data.get('destination', '').strip()
+        
+        if not destination:
+            return jsonify({'success': False, 'error': 'Número de destino requerido'}), 400
+        
+        if not destination.isdigit() or len(destination) != 10:
+            return jsonify({'success': False, 'error': 'Número debe tener 10 dígitos'}), 400
+        
+        if not ensure_auth():
+            return jsonify({'success': False, 'error': 'Error de autenticación con Tigo'}), 500
+        
+        success, packages, message = tigo_api.get_packages(destination)
+        
+        if not success:
+            return jsonify({'success': False, 'error': message}), 500
+        
+        organized = package_manager.organize_packages(packages)
+        flat_organized = package_manager.organize_packages_flat(packages)
+        package_manager.cache_packages(destination, packages)
+        
+        return jsonify({
+            'success': True,
+            'destination': destination,
+            'packages': flat_organized,
+            'by_category': organized,
+            'total': len(packages),
+            'summary': package_manager.get_summary(packages)
+        }), 200
+        
+    except Exception as e:
+        logger.error(f"Error en /api/admin/packages: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
 @app.route('/api/admin/recharge', methods=['POST'])
 @require_admin
 def admin_recharge():
@@ -634,7 +785,13 @@ def admin_recharge():
                 }
             }), 200
         else:
-            return jsonify({'success': False, 'error': result_msg, 'order_data': order_data}), 500
+            return jsonify({
+                'success': False, 
+                'error': result_msg, 
+                'order_data': order_data,
+                'destination': destination,
+                'package': {'id': selected_package.get('id'), 'name': selected_package.get('name'), 'amount': package_amount}
+            }), 500
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
 
@@ -646,46 +803,62 @@ def admin_keys():
         if request.method == 'GET':
             include_inactive = request.args.get('include_inactive', 'false').lower() == 'true'
             keys = key_manager.get_all_keys(include_inactive)
+            
+            # Agregar usernames de Telegram
+            usernames = load_telegram_usernames()
+            for key in keys:
+                tid = key.get('telegram_id')
+                if tid and str(tid) in usernames:
+                    key['telegram_username'] = usernames[str(tid)].get('username')
+                    key['telegram_first_name'] = usernames[str(tid)].get('first_name')
+            
             return jsonify({'success': True, 'keys': keys, 'stats': key_manager.get_stats()}), 200
         else:
             data = request.get_json()
             max_amount = int(data.get('max_amount', 0))
             valid_days = int(data.get('valid_days', 30))
             description = data.get('description', '')
-            telegram_id = int(data['telegram_id']) if data.get('telegram_id') else None
+            telegram_id = data.get('telegram_id')
             
-            if max_amount <= 0:
-                return jsonify({'success': False, 'error': 'max_amount debe ser positivo'}), 400
+            if telegram_id:
+                telegram_id = int(telegram_id)
             
             key = key_manager.generate_key(max_amount, valid_days, description, telegram_id)
             
-            if key:
-                return jsonify({'success': True, 'key': key, 'info': key_manager.get_key_info(key)}), 201
-            else:
-                if telegram_id:
-                    existing = key_manager.get_key_by_telegram_id(telegram_id)
-                    if existing:
-                        return jsonify({'success': False, 'error': f'Telegram ID ya tiene clave activa'}), 400
-                return jsonify({'success': False, 'error': 'Error generando clave'}), 500
+            if not key:
+                return jsonify({'success': False, 'error': 'Error generando clave o Telegram ID ya tiene clave'}), 400
+            
+            return jsonify({
+                'success': True,
+                'key': key,
+                'info': key_manager.get_key_info(key)
+            }), 201
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
 
 
 @app.route('/api/admin/keys/<key>', methods=['GET', 'PUT', 'DELETE'])
 @require_admin
-def admin_key_detail(key):
+def admin_key_actions(key):
     try:
         key_info = key_manager.get_key_info(key)
         if not key_info:
             return jsonify({'success': False, 'error': 'Clave no encontrada'}), 404
         
         if request.method == 'GET':
-            modifications = key_manager.get_modifications(key, 20)
+            # Agregar username de Telegram si existe
+            tid = key_info.get('telegram_id')
+            if tid:
+                usernames = load_telegram_usernames()
+                if str(tid) in usernames:
+                    key_info['telegram_username'] = usernames[str(tid)].get('username')
+                    key_info['telegram_first_name'] = usernames[str(tid)].get('first_name')
+            
             return jsonify({
                 'success': True,
                 'key': key,
                 'info': key_info,
-                'modifications': modifications,
+                'modifications': key_manager.get_modifications(key, 20),
                 'remaining': key_info['max_amount'] - key_info.get('used_amount', 0)
             }), 200
         
@@ -779,18 +952,27 @@ def admin_resellers():
     try:
         if request.method == 'GET':
             resellers = key_manager.get_all_resellers()
-            return jsonify({'success': True, 'resellers': resellers}), 200
+            
+            # Agregar usernames de Telegram
+            usernames = load_telegram_usernames()
+            for r in resellers:
+                tid = r.get('telegram_id')
+                if tid and str(tid) in usernames:
+                    r['telegram_username'] = usernames[str(tid)].get('username')
+                    r['telegram_first_name'] = usernames[str(tid)].get('first_name')
+            
+            return jsonify({'success': True, 'resellers': resellers, 'total': len(resellers)}), 200
         else:
             data = request.get_json()
+            name = data.get('name')
             telegram_id = int(data.get('telegram_id'))
-            name = data.get('name', f'Reseller_{telegram_id}')
             assigned_users = data.get('assigned_users', [])
             
             success = key_manager.create_reseller(telegram_id, name, assigned_users)
             return jsonify({
                 'success': success,
                 'message': 'Revendedor creado' if success else 'Error',
-                'reseller': key_manager.get_reseller(telegram_id)
+                'reseller': key_manager.get_reseller(telegram_id) if success else None
             }), 201 if success else 500
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
@@ -798,35 +980,50 @@ def admin_resellers():
 
 @app.route('/api/admin/resellers/<int:telegram_id>', methods=['GET', 'PUT', 'DELETE'])
 @require_admin
-def admin_reseller_detail(telegram_id):
+def admin_reseller_actions(telegram_id):
     try:
         reseller = key_manager.get_reseller(telegram_id)
         if not reseller:
             return jsonify({'success': False, 'error': 'Revendedor no encontrado'}), 404
         
         if request.method == 'GET':
+            # Agregar username de Telegram
+            usernames = load_telegram_usernames()
+            if str(telegram_id) in usernames:
+                reseller['telegram_username'] = usernames[str(telegram_id)].get('username')
+                reseller['telegram_first_name'] = usernames[str(telegram_id)].get('first_name')
+            
             return jsonify({'success': True, 'reseller': reseller}), 200
+        
         elif request.method == 'PUT':
-            data = request.get_json() or {}
+            data = request.get_json()
             success = key_manager.update_reseller(telegram_id, **data)
-            return jsonify({'success': success, 'reseller': key_manager.get_reseller(telegram_id)}), 200 if success else 500
+            return jsonify({
+                'success': success,
+                'message': 'Revendedor actualizado' if success else 'Error',
+                'reseller': key_manager.get_reseller(telegram_id)
+            }), 200 if success else 500
+        
         else:
-            success = key_manager.delete_reseller(telegram_id)
-            return jsonify({'success': success, 'message': 'Revendedor desactivado' if success else 'Error'}), 200 if success else 500
+            success = key_manager.deactivate_reseller(telegram_id)
+            return jsonify({
+                'success': success,
+                'message': 'Revendedor desactivado' if success else 'Error'
+            }), 200 if success else 500
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
 
 
 @app.route('/api/admin/resellers/<int:telegram_id>/assign', methods=['POST'])
 @require_admin
-def admin_assign_user_to_reseller(telegram_id):
+def admin_assign_user(telegram_id):
     try:
         data = request.get_json()
         user_telegram_id = int(data.get('user_telegram_id'))
         success = key_manager.assign_user_to_reseller(telegram_id, user_telegram_id)
         return jsonify({
             'success': success,
-            'message': f'Usuario {user_telegram_id} asignado' if success else 'Error'
+            'message': 'Usuario asignado' if success else 'Error'
         }), 200 if success else 500
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
@@ -834,14 +1031,14 @@ def admin_assign_user_to_reseller(telegram_id):
 
 @app.route('/api/admin/resellers/<int:telegram_id>/remove', methods=['POST'])
 @require_admin
-def admin_remove_user_from_reseller(telegram_id):
+def admin_remove_user(telegram_id):
     try:
         data = request.get_json()
         user_telegram_id = int(data.get('user_telegram_id'))
         success = key_manager.remove_user_from_reseller(telegram_id, user_telegram_id)
         return jsonify({
             'success': success,
-            'message': f'Usuario {user_telegram_id} removido' if success else 'Error'
+            'message': 'Usuario removido' if success else 'Error'
         }), 200 if success else 500
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
@@ -852,81 +1049,56 @@ def admin_remove_user_from_reseller(telegram_id):
 def admin_history():
     try:
         limit = int(request.args.get('limit', 100))
-        status_filter = request.args.get('status')
         admin_only = request.args.get('admin_only', 'false').lower() == 'true'
         
-        if not os.path.exists(HISTORY_FILE):
-            return jsonify({'success': True, 'history': [], 'total': 0}), 200
+        history = []
+        if os.path.exists(HISTORY_FILE):
+            with open(HISTORY_FILE, 'r', encoding='utf-8') as f:
+                history = json.load(f)
         
-        with open(HISTORY_FILE, 'r', encoding='utf-8') as f:
-            history = json.load(f)
-        
-        if status_filter:
-            history = [h for h in history if h.get('status') == status_filter.upper()]
         if admin_only:
-            history = [h for h in history if h.get('is_admin_recharge')]
-        
-        all_history = json.load(open(HISTORY_FILE, 'r', encoding='utf-8'))
-        total = len(all_history)
-        successful = sum(1 for h in all_history if h.get('status') == 'SUCCESS')
-        total_amount = sum(h.get('amount', 0) for h in all_history if h.get('status') == 'SUCCESS')
-        admin_recharges = sum(1 for h in all_history if h.get('is_admin_recharge'))
+            history = [h for h in history if h.get('is_admin_recharge', False)]
         
         return jsonify({
             'success': True,
             'history': history[:limit],
-            'stats': {
-                'total': total,
-                'successful': successful,
-                'failed': total - successful,
-                'total_amount': total_amount,
-                'admin_recharges': admin_recharges
-            }
+            'total': len(history)
         }), 200
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
 
 
 # ============================================================
-# AUTH ADMIN ENDPOINTS
+# ENDPOINTS DE AUTENTICACIÓN ADMIN
 # ============================================================
 @app.route('/api/admin/auth/init', methods=['POST'])
 @require_admin
-def admin_init_auth():
-    try:
-        data = request.get_json() or {}
-        method = data.get('method', 'new')
-        username = data.get('username')
-        use_new = method != 'legacy'
-        success = init_auth_system(use_new_method=use_new, username=username)
-        return jsonify({
-            'success': success,
-            'message': 'Autenticación inicializada' if success else 'Error',
-            'method': current_auth_method,
-            'account': tigo_api.auth.username if tigo_api else None
-        }), 200 if success else 500
-    except Exception as e:
-        return jsonify({'success': False, 'error': str(e)}), 500
+def admin_auth_init():
+    success = init_auth_system()
+    return jsonify({
+        'success': success,
+        'message': 'Sistema inicializado' if success else 'Error de inicialización'
+    }), 200 if success else 500
 
 
 @app.route('/api/admin/auth/refresh', methods=['POST'])
 @require_admin
-def admin_refresh_auth():
+def admin_auth_refresh():
     try:
-        if not tigo_api:
-            return jsonify({'success': False, 'error': 'Sistema no inicializado'}), 400
-        if hasattr(tigo_api.auth, 'force_refresh'):
-            success = tigo_api.auth.force_refresh()
-        else:
+        if tigo_api and hasattr(tigo_api.auth, 'login'):
             success = tigo_api.auth.login()
-        return jsonify({'success': success, 'message': 'Tokens renovados' if success else 'Error'}), 200 if success else 500
+            return jsonify({
+                'success': success,
+                'message': 'Token renovado' if success else 'Error renovando'
+            }), 200 if success else 500
+        return jsonify({'success': False, 'error': 'Sistema no inicializado'}), 500
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
 
 
 @app.route('/api/admin/auth/switch', methods=['POST'])
 @require_admin
-def admin_switch_account():
+def admin_auth_switch():
     global tigo_api
     try:
         success, new_account = auth_manager.switch_account()
@@ -934,66 +1106,31 @@ def admin_switch_account():
             tigo_api = TigoAPI(auth_manager.get_auth(new_account))
             return jsonify({
                 'success': True,
-                'message': f'Cambiado a cuenta {new_account}',
-                'current_account': new_account
+                'message': f'Cambiado a cuenta: {new_account}',
+                'account': new_account
             }), 200
-        return jsonify({'success': False, 'error': 'No se pudo cambiar de cuenta'}), 400
+        return jsonify({'success': False, 'error': 'No hay cuentas alternativas disponibles'}), 500
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
 
 
 @app.route('/api/admin/auth/retry', methods=['POST'])
 @require_admin
-def admin_retry_init():
-    global tigo_api, system_initialized
-    try:
-        success, msg = auth_manager.initialize_all_accounts()
-        if success:
-            auth = auth_manager.get_valid_auth()
-            if auth:
-                tigo_api = TigoAPI(auth)
-                system_initialized = True
-        return jsonify({
-            'success': success,
-            'message': msg,
-            'system_status': auth_manager.get_all_status()
-        }), 200 if success else 400
-    except Exception as e:
-        return jsonify({'success': False, 'error': str(e)}), 500
+def admin_auth_retry():
+    success = init_auth_system()
+    return jsonify({
+        'success': success,
+        'message': 'Reinicio exitoso' if success else 'Error en reintento'
+    }), 200 if success else 500
 
 
 # ============================================================
-# MANEJO DE ERRORES
+# MAIN
 # ============================================================
-@app.errorhandler(404)
-def not_found(e):
-    return jsonify({'success': False, 'error': 'Endpoint no encontrado'}), 404
-
-
-@app.errorhandler(500)
-def internal_error(e):
-    return jsonify({'success': False, 'error': 'Error interno del servidor'}), 500
-
-
-# ============================================================
-# INICIALIZACIÓN
-# ============================================================
-def initialize():
-    logger.info("=" * 60)
-    logger.info("INICIANDO API REST DE RECARGAS TIGO v2.2")
-    logger.info(f"Puerto: {API_PORT}")
-    logger.info(f"Bearer Token: {'Configurado' if SHARED_BEARER_TOKEN else 'NO'}")
-    logger.info("=" * 60)
-    
-    print_config_info()
-    
-    if init_auth_system():
-        status = auth_manager.get_system_status()
-        logger.info(f"✅ Sistema listo - Estado: {status}")
-    else:
-        logger.warning("⚠️ Inicialización inicial falló")
-
-
 if __name__ == '__main__':
-    initialize()
+    print_config_info()
+    logger.info(f"Iniciando API en puerto {API_PORT}...")
+    
+    init_auth_system()
+    
     app.run(host='0.0.0.0', port=API_PORT, debug=False, threaded=True)
